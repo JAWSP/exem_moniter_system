@@ -67,5 +67,6 @@ FILE *read_cmd(FILE *fp, char *cmd);
 //index_utils.c
 int indx_space(char *line, int i);
 int indx_go_next(char *line, int i);
+int indx_get_num(char *line, int i);
 
 # endif

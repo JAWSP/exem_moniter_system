@@ -1,6 +1,8 @@
+#as    23123213  213213123  78897 789 1221  8901812 123
 NAME = monitor
 MAIN = main.c
 SRCS = utils.c index_utils.c
+MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}
 
@@ -14,7 +16,7 @@ all : ${NAME}
 
 
 $(NAME) : ${OBJS}
-	${CC} ${PTHREAD} ${MAIN} ${SRCS} -o ${NAME}
+	${CC} ${PTHREAD} ${MEM} ${MAIN} ${SRCS} -o ${NAME}
 	${RM} ${OBJS}
 	@echo "\033[33m[monitor                                  by juhaprk]\033[0m"
 

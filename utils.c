@@ -8,13 +8,13 @@ void err_by(char *reason)
 
 FILE *read_cmd(FILE *fp, char *cmd)
 {
-		char  buf[BUFF_SIZE];
+	//	char  buf[BUFF_SIZE];
 
 	    fp = popen(cmd, "r");
         if (fp == NULL)
             err_by("popen failed");
 
-        while (fgets(buf, BUFF_SIZE, fp))
-            printf("%s", buf);
+      //  while (fgets(buf, BUFF_SIZE, fp))
+        //    printf("%s", buf);
 		return (fp);
 }
