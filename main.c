@@ -45,7 +45,6 @@ int main(void)
 		memUsage *mem = NULL;
 		packUsage *pack = NULL;
 		procInfo *proc = NULL;
-		printf("start\n");
 
 
 
@@ -58,6 +57,10 @@ int main(void)
        // fs = read_cmd(fs, "free");
     	//fs = read_cmd(fs, "cat /proc/net/dev");
         pclose(fs);
+		free(cpu);
+		free(mem);
+		free(pack);
+		free(proc);
 
         return (0);
 }

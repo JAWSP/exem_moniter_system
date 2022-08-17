@@ -20,7 +20,6 @@ int	indx_get_num(char *line, int i)
 		res = ((res * 10) + (line[i] - '0'));
 		i++;
 	}
-	printf("res : %d\n", res);
 	return (res);
 }
 
