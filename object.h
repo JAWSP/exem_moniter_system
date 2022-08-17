@@ -17,7 +17,7 @@ typedef struct s_osUsage
 	struct s_cpuUsage *cpu;
 	struct s_memUsage *mem;
 	struct s_packUsage *pack;
-}osUsage;
+} osUsage;
 
 typedef struct s_cpuUsage
 {
@@ -54,7 +54,7 @@ typedef struct s_process
 	char *user_name;
 	char *cmd_line;
 	struct pack_Usage *next;
-} process;
+} procInfo;
 
 /*
  * include func
@@ -65,7 +65,7 @@ void err_by(char *reason);
 FILE *read_cmd(FILE *fp, char *cmd);
 
 //index_utils.c
-int indx_spaces(char *line, int i);
-int indx_get_num(char *line, int i);
+int indx_space(char *line, int i);
+int indx_go_next(char *line, int i);
 
 # endif

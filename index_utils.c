@@ -11,8 +11,11 @@ int		indx_space(char *line, int i)
 	return (i);
 }
 
-int indx_getnum(char *line, int i)
+int indx_go_next(char *line, int i)
 {
-	int num = atoi(line);
+	while (line[i] != ' ' && line[i])
+		i++;
+	i = indx_space(&line[i], i);
+
 	return (i);
 }
