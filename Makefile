@@ -1,6 +1,6 @@
 NAME = monitor
 MAIN = main.c
-SRCS = utils.c
+SRCS = utils.c index_utils.c
 
 OBJS = ${SRCS:.c=.o}
 
