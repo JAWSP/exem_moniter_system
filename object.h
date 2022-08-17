@@ -43,4 +43,11 @@ typedef struct s_packUsage
 	struct pack_Usage *next;
 } packUsage;
 
+/*
+ * include func
+ */
+
+//util.c
+FILE *read_cmd(FILE *fp, char *cmd);
+
 # endif

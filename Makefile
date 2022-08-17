@@ -1,6 +1,6 @@
 NAME = monitor
 MAIN = main.c
-#SRCS = utils.c err.c init.c act.c 
+SRCS = utils.c
 
 OBJS = ${SRCS:.c=.o}
 
@@ -16,7 +16,7 @@ all : ${NAME}
 $(NAME) : ${OBJS}
 	${CC} ${PTHREAD} ${MAIN} ${SRCS} -o ${NAME}
 	${RM} ${OBJS}
-	@echo "\033[33m[philosophers                                  by juhaprk]\033[0m"
+	@echo "\033[33m[monitor                                  by juhaprk]\033[0m"
 
 .c.o :
 	${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
