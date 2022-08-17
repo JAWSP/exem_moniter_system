@@ -7,7 +7,10 @@
 #include <unistd.h>
 
 #define BUFF_SIZE 1024
+
+
 /*
+ * structs
  * 각각의 수집한 정보를 구조체 형식으로 저장
  */
 
