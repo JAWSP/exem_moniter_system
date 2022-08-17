@@ -44,7 +44,8 @@ void parse_mem(FILE* fs, memUsage *mem)
 	//아님 위의 두개의 값의 차이를 넣어야 할까?
 	i = indx_go_next(buf, i);
 	mem->free = indx_get_num(buf, i); //현재 mem 영역
-	
+
+	i = 0;
 	fgets(buf, BUFF_SIZE, fs);
 	if (ferror(fs))
 		err_by("stat parse error");
