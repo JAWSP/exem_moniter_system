@@ -190,7 +190,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	proc->cpu_time = utime + stime;
 
 	//username parse	
-	sprintf(cmd, "-ps -u -p %d", pid);
+	sprintf(cmd, "ps -u -p %d", pid);
 	fc = read_cmd(fc, cmd);
 	fgets(buf, BUFF_SIZE, fc);
 	fgets(buf, BUFF_SIZE, fc);
