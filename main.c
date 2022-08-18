@@ -1,5 +1,25 @@
 #include "object.h"
 
+void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **proc)
+{
+	*cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
+	if (!*(cpu))
+		err_by("malloc_error");
+	*mem = (memUsage*)malloc(sizeof(memUsage));
+	if (!*(mem))
+		err_by("malloc_error");
+	*pack = (packUsage*)malloc(sizeof(packUsage));
+	if (!(*pack))
+		err_by("malloc_error");
+	(*pack)->inter = NULL;
+	(*pack)->next = NULL;
+	*proc = (procInfo*)malloc(sizeof(procInfo));
+	if (!(*proc))
+		err_by("malloc_error");
+	(*proc)->name = NULL;
+	(*proc)->next = NULL;
+}
+
 void parse_cpu(FILE *fs, cpuUsage *cpu)
 {
 	char buf[BUFF_SIZE];
@@ -11,7 +31,6 @@ void parse_cpu(FILE *fs, cpuUsage *cpu)
 
 	i = indx_go_next(buf, i);
 	//get user time
-	//atoi를 쓰면 core dumped하면서 seg에러가 뜸
 	cpu->usr = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	i = indx_go_next(buf, i);
@@ -21,7 +40,6 @@ void parse_cpu(FILE *fs, cpuUsage *cpu)
 	cpu->idle = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	cpu->iowait = indx_get_num(buf, i);
-
 }
 
 void parse_mem(FILE* fs, memUsage *mem)
@@ -34,7 +52,7 @@ void parse_mem(FILE* fs, memUsage *mem)
 	fgets(buf, BUFF_SIZE, fs);
 	fgets(buf, BUFF_SIZE, fs);
 	if (ferror(fs))
-		err_by("stat parse error");
+		err_by("mem parse error");
 
 	i = indx_go_next(buf, i);
 	mem->total = indx_get_num(buf, i);
@@ -48,28 +66,84 @@ void parse_mem(FILE* fs, memUsage *mem)
 	i = 0;
 	fgets(buf, BUFF_SIZE, fs);
 	if (ferror(fs))
-		err_by("stat parse error");
+		err_by("swap_mem parse error");
 	i = indx_go_next(buf, i);
 	mem->swap_total = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	mem->swap_used = indx_get_num(buf, i); //swap mem영역
-//	printf("buf : %s", buf);
 }
 
-void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **proc)
+packUsage *insert_packet(char *buf, packUsage *pack)
 {
-	*cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
-	if (!*(cpu))
-		err_by("malloc_error");
-	*mem = (memUsage*)malloc(sizeof(memUsage));
-	if (!*(mem))
-		err_by("malloc_error");
-	*pack = (packUsage*)malloc(sizeof(packUsage));
-	if (!(*pack))
-		err_by("malloc_error");
-	*proc = (procInfo*)malloc(sizeof(procInfo));
-	if (!(*proc))
-		err_by("malloc_error");
+	int i = 0;
+	char name[30];
+
+	i = indx_space(buf, i);
+	if (!sscanf(&buf[i], "%s, %d, %d", pack->inter, &pack->in_bytes, &pack->in_packets))
+		err_by("rx packet sscanf error");
+	name[strlen(name) - 1] = '\0'; //해당 단어 뒤 : 문자 제거를 위함;
+	for (int count = 0; count < 9; count++)
+		i = indx_go_next(buf, i);
+	if (!sscanf(&buf[i], "%d, %d", &pack->out_bytes, &pack->out_packets))
+		err_by("tx packet sscanf error");
+	return (pack);
+}
+
+void parse_packet(FILE *fs, packUsage *pack)
+{
+	char buf[BUFF_SIZE];
+	
+	fgets(buf, BUFF_SIZE, fs);
+	while (fgets(buf, BUFF_SIZE, fs) != 0)
+	{
+		if (ferror(fs))
+			err_by("net socket parse error");
+		if (pack->inter)
+		{
+			packUsage *new;
+			packUsage *tmp = pack;
+			new = (packUsage*)malloc(sizeof(packUsage));
+			if (!new)
+				err_by("new pack malloc_error");
+			new->inter = NULL;
+			new->next = NULL;
+			insert_packet(buf, new);
+			while (tmp->next)
+				tmp = tmp->next;
+			tmp->next = new;
+			//대충 새로운 노드를 만들어서 뒤에 붙이는 함수
+		}
+		else
+			insert_packet(buf, pack);
+	}
+}
+
+void pack_free(packUsage **head)
+{
+    packUsage *del = NULL;
+    packUsage *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
+}
+
+void proc_free(procInfo **head)
+{
+    procInfo *del = NULL;
+    procInfo *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
 }
 
 int main(void)
@@ -79,8 +153,6 @@ int main(void)
 		memUsage *mem = NULL;
 		packUsage *pack = NULL;
 		procInfo *proc = NULL;
-
-
 
 		init_structs(&cpu, &mem, &pack, &proc);
 //		fs = read_cmd(fs, "cat Makefile");
@@ -92,12 +164,24 @@ int main(void)
 //		fs = read_cmd(fs, "ls -al");
 		parse_mem(fs, mem);
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n", mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
-    	//fs = read_cmd(fs, "cat /proc/net/dev");
+    	fs = read_cmd(fs, "cat /proc/net/dev");
+		parse_packet(fs, pack);
+		packUsage *tmp = pack;
+		while (tmp)
+		{
+			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d", tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
+			tmp = tmp->next;
+		}
+
+		//닫기
         pclose(fs);
 		free(cpu);
+		cpu = NULL;
 		free(mem);
-		free(pack);
-		free(proc);
+		mem = NULL;
+		pack_free(&pack);
+		proc_free(&proc);
+
 
         return (0);
 }

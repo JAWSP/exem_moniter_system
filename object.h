@@ -41,11 +41,12 @@ typedef struct s_memUsage
 
 typedef struct s_packUsage
 {
+	char *inter;
 	int in_bytes;
-	int in_pakcets;
+	int in_packets;
 	int out_bytes;
 	int out_packets;
-	struct pack_Usage *next;
+	struct s_packUsage *next;
 } packUsage;
 
 typedef struct s_process
@@ -56,7 +57,7 @@ typedef struct s_process
 	int cpu_time;
 	char *user_name;
 	char *cmd_line;
-	struct pack_Usage *next;
+	struct s_process *next;
 } procInfo;
 
 /*
