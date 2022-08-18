@@ -94,6 +94,7 @@ void parse_packet(FILE *fs, packUsage *pack)
 	char buf[BUFF_SIZE];
 	
 	fgets(buf, BUFF_SIZE, fs);
+	fgets(buf, BUFF_SIZE, fs);
 	while (fgets(buf, BUFF_SIZE, fs) != 0)
 	{
 		if (ferror(fs))
