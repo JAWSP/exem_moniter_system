@@ -11,13 +11,51 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 	*pack = (packUsage*)malloc(sizeof(packUsage));
 	if (!(*pack))
 		err_by("malloc_error");
-	(*pack)->inter = NULL;
-	(*pack)->next = NULL;
 	*proc = (procInfo*)malloc(sizeof(procInfo));
 	if (!(*proc))
 		err_by("malloc_error");
+
+	(*pack)->inter = NULL;
+	(*pack)->next = NULL;
 	(*proc)->name = NULL;
 	(*proc)->next = NULL;
+}
+
+void pack_free(packUsage **head)
+{
+    packUsage *del = NULL;
+    packUsage *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		free(del->inter);
+		del->inter = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
+}
+
+void proc_free(procInfo **head)
+{
+    procInfo *del = NULL;
+    procInfo *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		//인자들 free
+		free(del->name);
+		del->name = NULL;
+		free(del->user_name);
+		del->user_name = NULL;
+		free(del->name);
+		del->cmd_line = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
 }
 
 void parse_cpu(FILE *fs, cpuUsage *cpu)
@@ -82,6 +120,8 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	if (!sscanf(&buf[i], "%s %d %d", name, &pack->in_bytes, &pack->in_packets))
 		err_by("rx packet sscanf error");
 	name[strlen(name) - 1] = '\0'; //해당 단어 뒤 : 문자 제거를 위함;
+	//해당 변수를 pack->inter[30]처럼 크기를 바로 할당을 할지 아니면 이후에 dup시킬지 고민함
+	//dup이 더 안정적일 것 같아서 넣음
 	pack->inter = strdup(name);
 	for (int count = 0; count < 9; count++)
 		i = indx_go_next(buf, i);
@@ -120,34 +160,93 @@ void parse_packet(FILE *fs, packUsage *pack)
 	}
 }
 
-void pack_free(packUsage **head)
+procInfo *insert_proc(int pid, procInfo *proc)
 {
-    packUsage *del = NULL;
-    packUsage *tmp = *head;
-    while (tmp)
-    {
-        del = tmp;
-        tmp = tmp->next;
-		free(del->inter);
-		del->inter = NULL;
-        free(del);
-		del = NULL;
-    }
-	*head = NULL;
+	//TODO 함수를 쪼개야 함
+	FILE *fc = NULL;
+	char cmd[40], buf[BUFF_SIZE], name[BUFF_SIZE];
+	int utime, stime;
+
+	//stat parse
+	sprintf(cmd, "cat /proc/%d/stat", pid);
+	fc = read_cmd(fc, cmd);
+	fgets(buf, BUFF_SIZE, fc);
+	if (ferror(fc))
+		err_by("proc/pidstat get error");
+	if (!sscanf(buf, "%d %s %*s %d", &proc->pid, name, &proc->ppid))
+		err_by("proc/pid/stat sscanf error");
+
+	//get name
+	name[strlen(name) -1] = '\0';
+	proc->name = strdup(&name[1]);
+
+	//get cpu time
+	int i = 0;
+	for (int count = 0; count < 14; count++)
+		i = indx_go_next(buf, i);
+	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
+		err_by("process cputime  sscanf error");
+	//TODO 경과시간 jiffies으로 나누어서 구하시오
+	proc->cpu_time = utime + stime;
+
+	//username parse	
+	sprintf(cmd, "-ps -u -p %d", pid);
+	fc = read_cmd(fc, cmd);
+	fgets(buf, BUFF_SIZE, fc);
+	fgets(buf, BUFF_SIZE, fc);
+	if (ferror(fc))
+		err_by("usrname get error");
+	if (!sscanf(buf, "%s",name))
+		err_by("username sscanf error");
+	proc->user_name = strdup(name);	
+
+	//cmdline parse
+	sprintf(cmd, "cat /proc/%d/cmdline", pid);
+	fc = read_cmd(fc, cmd);
+	fgets(buf, BUFF_SIZE, fc);
+	if (strlen(buf) == 0)
+		proc->cmd_line = strdup("NULL");
+	else
+		proc->cmd_line = strdup(buf);
+
+	pclose(fc);
+	return (proc);
 }
 
-void proc_free(procInfo **head)
+void parse_process(FILE *fs, procInfo *proc)
 {
-    procInfo *del = NULL;
-    procInfo *tmp = *head;
-    while (tmp)
-    {
-        del = tmp;
-        tmp = tmp->next;
-        free(del);
-		del = NULL;
-    }
-	*head = NULL;
+	char buf[BUFF_SIZE];
+	int pid = 0;
+
+	while (1)
+	{
+		fgets(buf, BUFF_SIZE, fs);
+		if (feof(fs))
+			break ;
+		if (ferror(fs))
+			err_by("pid parse error");
+		if ((pid = atoi(buf)) > 0)
+		{
+			if (proc->name)
+			{
+				procInfo *new;
+				procInfo *tmp = proc;
+				new = (procInfo*)malloc(sizeof(procInfo));
+				if (!new)
+					err_by("new pack malloc_error");
+				new->name = NULL;
+				new->next = NULL;
+				insert_proc(pid, new);
+				while (tmp->next)
+					tmp = tmp->next;
+				tmp->next = new;
+				continue ;
+			}
+			insert_proc(pid, proc);
+		}
+		else
+			break ; //이후로는 Pid가 안나오므로
+	}
 }
 
 int main(void)
@@ -176,6 +275,8 @@ int main(void)
 			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n", tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
 			tmp = tmp->next;
 		}
+		fs = read_cmd(fs, "ls /proc");
+		parse_process(fs, proc);
 
 		//닫기
         pclose(fs);
