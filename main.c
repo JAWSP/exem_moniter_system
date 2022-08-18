@@ -279,7 +279,7 @@ int main(void)
 		while (tmp2)
 		{
 			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n", tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
-			tmp = tmp->next;
+			tmp2 = tmp2->next;
 		}
 
 		//닫기
