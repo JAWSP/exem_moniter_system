@@ -218,11 +218,9 @@ void parse_process(FILE *fs, procInfo *proc)
 	char buf[BUFF_SIZE];
 	int pid = 0;
 
-	while (1)
+	while (!feof(fs))
 	{
 		fgets(buf, BUFF_SIZE, fs);
-		if (feof(fs))
-			break ;
 		if (ferror(fs))
 			err_by("pid parse error");
 		if ((pid = atoi(buf)) > 0)
