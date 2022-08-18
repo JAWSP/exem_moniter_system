@@ -203,6 +203,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	//cmdline parse
 	sprintf(cmd, "cat /proc/%d/cmdline", pid);
 	fc = read_cmd(fc, cmd);
+	buf[0] = '\0';
 	fgets(buf, BUFF_SIZE, fc);
 	if (strlen(buf) == 0)
 		proc->cmd_line = strdup("NULL");
