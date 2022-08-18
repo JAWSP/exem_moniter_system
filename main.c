@@ -79,12 +79,13 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	char name[30];
 
 	i = indx_space(buf, i);
-	if (!sscanf(&buf[i], "%s, %d, %d", pack->inter, &pack->in_bytes, &pack->in_packets))
+	if (!sscanf(&buf[i], "%s %d %d", name, &pack->in_bytes, &pack->in_packets))
 		err_by("rx packet sscanf error");
 	name[strlen(name) - 1] = '\0'; //해당 단어 뒤 : 문자 제거를 위함;
+	pack->inter = strdup(name);
 	for (int count = 0; count < 9; count++)
 		i = indx_go_next(buf, i);
-	if (!sscanf(&buf[i], "%d, %d", &pack->out_bytes, &pack->out_packets))
+	if (!sscanf(&buf[i], "%d %d", &pack->out_bytes, &pack->out_packets))
 		err_by("tx packet sscanf error");
 	return (pack);
 }
@@ -127,6 +128,8 @@ void pack_free(packUsage **head)
     {
         del = tmp;
         tmp = tmp->next;
+		free(del->inter);
+		del->inter = NULL;
         free(del);
 		del = NULL;
     }
@@ -170,7 +173,7 @@ int main(void)
 		packUsage *tmp = pack;
 		while (tmp)
 		{
-			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d", tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
+			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n", tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
 			tmp = tmp->next;
 		}
 
