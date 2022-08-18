@@ -50,7 +50,7 @@ void proc_free(procInfo **head)
 		del->name = NULL;
 		free(del->user_name);
 		del->user_name = NULL;
-		free(del->name);
+		free(del->cmd_line);
 		del->cmd_line = NULL;
         free(del);
 		del = NULL;
