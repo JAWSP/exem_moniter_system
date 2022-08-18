@@ -275,6 +275,12 @@ int main(void)
 		}
 		fs = read_cmd(fs, "ls /proc");
 		parse_process(fs, proc);
+		procInfo *tmp2 = proc;
+		while (tmp2)
+		{
+			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n", tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
+			tmp = tmp->next;
+		}
 
 		//닫기
         pclose(fs);
