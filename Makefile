@@ -1,7 +1,6 @@
-#as    23123213  213213123  78897 789 1221  8901812 123
 NAME = monitor
 MAIN = main.c
-SRCS = utils.c index_utils.c
+SRCS = utils.c index_utils.c parse.c
 MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}

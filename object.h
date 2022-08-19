@@ -64,6 +64,12 @@ typedef struct s_process
  * include func
  */
 
+//parse.c
+void parse_cpu(FILE *fs, cpuUsage *cpu);
+void parse_mem(FILE* fs, memUsage *mem);
+void parse_packet(FILE *fs, packUsage *pack);
+void parse_process(FILE *fs, procInfo *proc);
+
 //util.c
 void err_by(char *reason);
 FILE *read_cmd(FILE *fp, char *cmd);
