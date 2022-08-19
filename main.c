@@ -15,6 +15,11 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 	if (!(*proc))
 		err_by("malloc_error");
 
+	(*cpu)->cf = NULL;
+	(*mem)->mf = NULL;
+	(*pack)->paf = NULL;
+	(*proc)->prf = NULL;
+
 	(*pack)->inter = NULL;
 	(*pack)->next = NULL;
 	(*proc)->name = NULL;
@@ -64,14 +69,14 @@ void test(cpuUsage *cpu, memUsage *mem, packUsage *pack, procInfo *proc)
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
 		packUsage *tmp = pack;
-		while (tmp)
+		while (tmp && tmp->inter)
 		{
 			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n",
 					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
 			tmp = tmp->next;
 		}
 		procInfo *tmp2 = proc;
-		while (tmp2)
+		while (tmp2 && tmp2->name)
 		{
 			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
 					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
@@ -81,31 +86,33 @@ void test(cpuUsage *cpu, memUsage *mem, packUsage *pack, procInfo *proc)
 
 int main(void)
 {
-        FILE *fs = NULL;
 		cpuUsage *cpu = NULL;
 		memUsage *mem = NULL;
 		packUsage *pack = NULL;
 		procInfo *proc = NULL;
 
 		init_structs(&cpu, &mem, &pack, &proc);
-//		fs = read_cmd(fs, "cat Makefile");
-		fs = read_cmd(fs, "cat /proc/stat");
-		parse_cpu(fs, cpu);
-		//TODO
-		fs = read_cmd(fs, "free");
-//		fs = read_cmd(fs, "ls -al");
-		parse_mem(fs, mem);
-    	fs = read_cmd(fs, "cat /proc/net/dev");
-		parse_packet(fs, pack);
+	
+		cpu->cf = read_cmd(cpu->cf, "cat /proc/stat");
+		parse_cpu(cpu->cf, cpu);
+	
+		mem->mf = read_cmd(mem->mf, "free");
+		parse_mem(mem->mf, mem);
 
-		fs = read_cmd(fs, "ls /proc");
-		parse_process(fs, proc);
+		pack->paf = read_cmd(pack->paf, "cat /proc/net/dev");
+		parse_packet(pack->paf, pack);
+
+		proc->prf = read_cmd(proc->prf, "ls /proc");
+		parse_process(proc->prf, proc);
 		
 		test(cpu, mem, pack, proc);
 
 
 		//닫기
-        pclose(fs);
+        pclose(cpu->cf);
+        pclose(mem->mf);
+        pclose(pack->paf);
+        pclose(proc->prf);
 		free(cpu);
 		cpu = NULL;
 		free(mem);
