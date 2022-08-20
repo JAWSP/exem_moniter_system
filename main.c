@@ -17,8 +17,8 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 
 	(*cpu)->cf = NULL;
 	(*mem)->mf = NULL;
-	(*pack)->paf = NULL;
-	(*proc)->prf = NULL;
+	(*pack)->nf = NULL;
+	(*proc)->pf = NULL;
 
 	(*pack)->inter = NULL;
 	(*pack)->next = NULL;
@@ -86,39 +86,60 @@ void test(cpuUsage *cpu, memUsage *mem, packUsage *pack, procInfo *proc)
 
 int main(void)
 {
+	//TODO 받은 내용 계산할 부분은 계산시키기
+	//TODO 가독성 있게 맞추기
+	//TODO 소켓화 시켜서 넘겨주기
+	//TODO 저기에 스레드 뿐만 아니라 여러번 측정해야 하니 그부분도 신경써줘야함
+
 		cpuUsage *cpu = NULL;
 		memUsage *mem = NULL;
 		packUsage *pack = NULL;
 		procInfo *proc = NULL;
+		pthread_t pid_c;
+		pthread_t pid_m;
+		pthread_t pid_n;
+		pthread_t pid_p;;
 
-		init_structs(&cpu, &mem, &pack, &proc);
-	
-		cpu->cf = read_cmd(cpu->cf, "cat /proc/stat");
-		parse_cpu(cpu->cf, cpu);
-	
-		mem->mf = read_cmd(mem->mf, "free");
-		parse_mem(mem->mf, mem);
-
-		pack->paf = read_cmd(pack->paf, "cat /proc/net/dev");
-		parse_packet(pack->paf, pack);
-
-		proc->prf = read_cmd(proc->prf, "ls /proc");
-		parse_process(proc->prf, proc);
+		while (1)
+		{
+			init_structs(&cpu, &mem, &pack, &proc);
 		
-		test(cpu, mem, pack, proc);
+			cpu->cf = read_cmd(cpu->cf, "cat /proc/stat");
+		//	parse_cpu(cpu);
+			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
+		
+			mem->mf = read_cmd(mem->mf, "free");
+		//	parse_mem(mem);
+			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
+
+			pack->nf = read_cmd(pack->nf, "cat /proc/net/dev");
+		//	parse_packet(pack);
+			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
+
+			proc->pf = read_cmd(proc->pf, "ls /proc");
+		//	parse_process(proc);
+			pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
+			
+			pthread_join(pid_c, 0);
+			pthread_join(pid_m, 0);
+			pthread_join(pid_n, 0);
+			pthread_join(pid_p, 0);
+			test(cpu, mem, pack, proc);
 
 
-		//닫기
-        pclose(cpu->cf);
-        pclose(mem->mf);
-        pclose(pack->paf);
-        pclose(proc->prf);
-		free(cpu);
-		cpu = NULL;
-		free(mem);
-		mem = NULL;
-		pack_free(&pack);
-		proc_free(&proc);
+			//닫기
+			pclose(cpu->cf);
+			pclose(mem->mf);
+			pclose(pack->nf);
+			pclose(proc->pf);
+			free(cpu);
+			cpu = NULL;
+			free(mem);
+			mem = NULL;
+			pack_free(&pack);
+			proc_free(&proc);
+
+		}
 
         return (0);
 }

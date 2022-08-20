@@ -16,12 +16,13 @@
  */
 
 //OS사용 부분을 합친부분을 쓸지는 일단 보류
-typedef struct s_osUsage
+typedef struct s_data
 {
 	struct s_cpuUsage *cpu;
 	struct s_memUsage *mem;
 	struct s_packUsage *pack;
-} osUsage;
+	struct s_process *proc;
+} data;
 
 typedef struct s_cpuUsage
 {
@@ -49,7 +50,7 @@ typedef struct s_packUsage
 	int in_packets;
 	int out_bytes;
 	int out_packets;
-	FILE *paf;
+	FILE *nf;
 	struct s_packUsage *next;
 } packUsage;
 
@@ -61,7 +62,7 @@ typedef struct s_process
 	int cpu_time;
 	char *user_name;
 	char *cmd_line;
-	FILE *prf;
+	FILE *pf;
 	struct s_process *next;
 } procInfo;
 
@@ -70,10 +71,10 @@ typedef struct s_process
  */
 
 //parse.c
-void parse_cpu(FILE *fs, cpuUsage *cpu);
-void parse_mem(FILE* fs, memUsage *mem);
-void parse_packet(FILE *fs, packUsage *pack);
-void parse_process(FILE *fs, procInfo *proc);
+void *pth_parse_cpu(void *cp);
+void *pth_parse_mem(void *me);
+void *pth_parse_packet(void *pac);
+void *pth_parse_process(void *pro);
 
 //util.c
 void err_by(char *reason);

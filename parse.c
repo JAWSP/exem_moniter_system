@@ -1,9 +1,11 @@
 #include "object.h"
 
-void parse_cpu(FILE *fs, cpuUsage *cpu)
+void *pth_parse_cpu(void *cp)
 {
+	cpuUsage *cpu = cp;
 	char buf[BUFF_SIZE];
 	int i = 0;
+	FILE *fs = cpu->cf;
 
 	fgets(buf, BUFF_SIZE, fs);
 	if (ferror(fs))
@@ -20,12 +22,16 @@ void parse_cpu(FILE *fs, cpuUsage *cpu)
 	cpu->idle = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	cpu->iowait = indx_get_num(buf, i);
+
+	return ((void*)0);
 }
 
-void parse_mem(FILE* fs, memUsage *mem)
+void *pth_parse_mem(void *me)
 {
+	memUsage *mem = me;
 	char buf[BUFF_SIZE];
 	int i = 0;
+	FILE *fs = mem->mf;
 	
 	//원하고자 하는 정보는 2번째 줄에 있으니 
 	//개행까지 읽어들이는 fgets를 2번 불러온다
@@ -51,6 +57,8 @@ void parse_mem(FILE* fs, memUsage *mem)
 	mem->swap_total = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	mem->swap_used = indx_get_num(buf, i); //swap mem영역
+	
+	return ((void*)0);
 }
 
 packUsage *insert_packet(char *buf, packUsage *pack)
@@ -72,9 +80,11 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	return (pack);
 }
 
-void parse_packet(FILE *fs, packUsage *pack)
+void *pth_parse_packet(void *pac)
 {
+	packUsage *pack = pac;
 	char buf[BUFF_SIZE];
+	FILE *fs = pack->nf;
 	
 	fgets(buf, BUFF_SIZE, fs);
 	fgets(buf, BUFF_SIZE, fs);
@@ -100,6 +110,8 @@ void parse_packet(FILE *fs, packUsage *pack)
 		else
 			insert_packet(buf, pack);
 	}
+	
+	return ((void*)0);
 }
 
 procInfo *insert_proc(int pid, procInfo *proc)
@@ -156,10 +168,12 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	return (proc);
 }
 
-void parse_process(FILE *fs, procInfo *proc)
+void *pth_parse_process(void *pro)
 {
+	procInfo *proc = pro;
 	char buf[BUFF_SIZE];
 	int pid = 0;
+	FILE *fs = proc->pf;
 
 	while (!feof(fs))
 	{
@@ -188,4 +202,6 @@ void parse_process(FILE *fs, procInfo *proc)
 		else
 			break ; //이후로는 Pid가 안나오므로
 	}
+	
+	return ((void*)0);
 }
