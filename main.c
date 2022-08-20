@@ -128,10 +128,7 @@ int main(void)
 
 
 			//닫기
-			pclose(cpu->cf);
-			pclose(mem->mf);
-			pclose(pack->nf);
-			pclose(proc->pf);
+
 			free(cpu);
 			cpu = NULL;
 			free(mem);
@@ -139,7 +136,11 @@ int main(void)
 			pack_free(&pack);
 			proc_free(&proc);
 
-		}
+		}	
+		pclose(cpu->cf);
+		pclose(mem->mf);
+		pclose(pack->nf);
+		pclose(proc->pf);
 
         return (0);
 }
