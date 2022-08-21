@@ -104,15 +104,15 @@ int main(void)
 		{
 			init_structs(&cpu, &mem, &pack, &proc);
 		
-			cpu->cf = read_cmd(cpu->cf, "cat /proc/stat");
+			cpu->cf = open_fs(cpu->cf, "cat /proc/stat");
 		//	parse_cpu(cpu);
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
 		
-			mem->mf = read_cmd(mem->mf, "free");
+			mem->mf = open_fs(mem->mf, "free");
 		//	parse_mem(mem);
 			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 
-			pack->nf = read_cmd(pack->nf, "cat /proc/net/dev");
+			pack->nf = open_fs(pack->nf, "cat /proc/net/dev");
 		//	parse_packet(pack);
 			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
 

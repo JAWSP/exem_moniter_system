@@ -18,3 +18,16 @@ FILE *read_cmd(FILE *fp, char *cmd)
         //    printf("%s", buf);
 		return (fp);
 }
+
+FILE *open_fs(FILE *fs, char *root)
+{
+	//	char  buf[BUFF_SIZE];
+
+	    fs = fopen(root, "r");
+        if (fs == NULL)
+            err_by("fopen failed");
+
+      //  while (fgets(buf, BUFF_SIZE, fp))
+        //    printf("%s", buf);
+		return (fs);
+}

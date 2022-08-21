@@ -1,5 +1,7 @@
 #include "object.h"
 
+//TODO 파싱 과정 어느정도 획일화 하게
+//TODO popen 대신 다른 파싱 방법 찾아보기
 void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
@@ -86,6 +88,7 @@ void *pth_parse_packet(void *pac)
 	char buf[BUFF_SIZE];
 	FILE *fs = pack->nf;
 	
+	//원하고자 하는 내용은 3번째 줄에 있다
 	fgets(buf, BUFF_SIZE, fs);
 	fgets(buf, BUFF_SIZE, fs);
 	while (fgets(buf, BUFF_SIZE, fs) != 0)

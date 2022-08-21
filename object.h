@@ -78,11 +78,12 @@ void *pth_parse_process(void *pro);
 
 //util.c
 void err_by(char *reason);
-FILE *read_cmd(FILE *fp, char *cmd);
+FILE *read_cmd(FILE *fp, char *cmd); //fopen사용에 따라 사라질 예정
+FILE *open_fs(FILE *fs, char *root);
 
 //index_utils.c
 int indx_space(char *line, int i);
 int indx_go_next(char *line, int i);
-int indx_get_num(char *line, int i);
+int indx_get_num(char *line, int i); //sscanf를 이용함에따라 사라질 예정
 
 # endif
