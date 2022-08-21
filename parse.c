@@ -35,6 +35,38 @@ void *pth_parse_mem(void *me)
 	int i = 0;
 	FILE *fs = mem->mf;
 	
+	while (fgets(buf, BUFF_SIZE, fs))
+	{
+		if (i == 0)
+		{
+			if (!sscanf(buf, "%*s %d", &mem->total))
+				err_by("total mem  sscanf error");
+		}
+		else if (i == 1)
+		{
+			if (!sscanf(buf, "%*s %d", &mem->free))
+				err_by("free mem sscanf error");
+			mem->used = mem->total - mem->free;
+		}
+		else if (i == 14)
+		{
+			if (!sscanf(buf, "%*s %d", &mem->swap_total))
+				err_by("swap total mem sscanf error");
+		}
+		else if (i == 15)
+		{
+			int tmp;
+			if (!sscanf(buf, "%*s %d", &tmp))
+				err_by("swap free sscanf error");
+			mem->swap_used = mem->swap_total - tmp;
+		}
+		else if (i >= 16)
+			break ;
+		i++;
+	}	
+		if (ferror(fs))
+			err_by("mem parse error");
+	/*
 	//원하고자 하는 정보는 2번째 줄에 있으니 
 	//개행까지 읽어들이는 fgets를 2번 불러온다
 	fgets(buf, BUFF_SIZE, fs);
@@ -59,6 +91,7 @@ void *pth_parse_mem(void *me)
 	mem->swap_total = indx_get_num(buf, i);
 	i = indx_go_next(buf, i);
 	mem->swap_used = indx_get_num(buf, i); //swap mem영역
+	*/
 	
 	return ((void*)0);
 }
