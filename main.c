@@ -65,7 +65,8 @@ void proc_free(procInfo **head)
 
 void test(cpuUsage *cpu, memUsage *mem, packUsage *pack, procInfo *proc)
 {
-		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n", cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+				cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
 		packUsage *tmp = pack;

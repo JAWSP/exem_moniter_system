@@ -173,6 +173,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 
 	//cpu time은 stat에 위치해있다
 	i = 0;
+	buf[0] = '\0';
 	sprintf(cmd, "/proc/%d/stat", pid);
 	fs = open_fs(fs, cmd);
 	for (int count = 0; count < 14; count++)
@@ -180,7 +181,17 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
 		err_by("process cputime  sscanf error");
 	proc->cpu_time = utime + stime;
-	
+
+	//cmdline parse
+	sprintf(cmd, "cat /proc/%d/cmdline", pid);
+	fs = open_fs(fs, cmd);
+	buf[0] = '\0';
+	fgets(buf, BUFF_SIZE, fs);
+	if (strlen(buf) == 0)
+		proc->cmd_line = strdup("");
+	else
+		proc->cmd_line = strdup(buf);
+
 	pclose(fs);
 	return (proc);
 }
