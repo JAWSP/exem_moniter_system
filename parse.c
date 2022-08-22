@@ -1,7 +1,5 @@
 #include "object.h"
 
-//TODO 파싱 과정 어느정도 획일화 하게
-//TODO popen 대신 다른 파싱 방법 찾아보기
 void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
@@ -170,6 +168,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	}
 
 	//cpu time은 stat에 위치해있다
+	fclose(fs);
 	i = 0;
 	buf[0] = '\0';
 	sprintf(cmd, "/proc/%d/stat", pid);
@@ -179,7 +178,8 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
 		err_by("process cputime  sscanf error");
 	proc->cpu_time = utime + stime;
-
+	
+	fclose(fs);
 	//cmdline parse
 	sprintf(cmd, "/proc/%d/cmdline", pid);
 	fs = open_fs(fs, cmd);

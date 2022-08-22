@@ -121,7 +121,12 @@ int main(void)
 			pthread_join(pid_m, 0);
 			pthread_join(pid_n, 0);
 			pthread_join(pid_p, 0);
-			test(cpu, mem, pack, proc);
+			test(cpu, mem, pack, proc);	
+
+			fclose(cpu->cf);
+			fclose(mem->mf);
+			fclose(pack->nf);
+			closedir(proc->dir);
 
 
 			//닫기
@@ -135,10 +140,7 @@ int main(void)
 
 			usleep(1000 * 1000);
 		}	
-		fclose(cpu->cf);
-		fclose(mem->mf);
-		fclose(pack->nf);
-		closedir(proc->dir);
+
 
         return (0);
 }
