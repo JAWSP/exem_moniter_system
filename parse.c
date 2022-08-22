@@ -138,7 +138,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	//stat parse
 	
 	//get pid,ppid,raw name
-	sprintf(cmd, "cat /proc/%d/status", pid);
+	sprintf(cmd, "/proc/%d/status", pid);
 	fs = open_fs(fs, cmd);
 	while (fgets(buf, BUFF_SIZE, fs) != 0)
 	{
@@ -173,54 +173,14 @@ procInfo *insert_proc(int pid, procInfo *proc)
 
 	//cpu time은 stat에 위치해있다
 	i = 0;
-	sprintf(cmd, "cat /proc/%d/stat", pid);
+	sprintf(cmd, "/proc/%d/stat", pid);
 	fs = open_fs(fs, cmd);
 	for (int count = 0; count < 14; count++)
 		i = indx_go_next(buf, i);
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
 		err_by("process cputime  sscanf error");
 	proc->cpu_time = utime + stime;
-	/*
-	fgets(buf, BUFF_SIZE, fc);
-	if (ferror(fc))
-		err_by("proc/pidstat get error");
-	if (!sscanf(buf, "%d %s %*s %d", &proc->pid, name, &proc->ppid))
-		err_by("proc/pid/stat sscanf error");
-
-	//get name except ()
-	name[strlen(name) -1] = '\0';
-	proc->name = strdup(&name[1]);
-
-	//get cpu time
-	int i = 0;
-	for (int count = 0; count < 14; count++)
-		i = indx_go_next(buf, i);
-	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
-		err_by("process cputime  sscanf error");
-	proc->cpu_time = utime + stime;
-
-	//username parse	
-	sprintf(cmd, "ps -u -p %d", pid);
-	fc = read_cmd(fc, cmd);
-	fgets(buf, BUFF_SIZE, fc);
-	fgets(buf, BUFF_SIZE, fc);
-	if (ferror(fc))
-		err_by("usrname get error");
-	if (!sscanf(buf, "%s",name))
-		err_by("username sscanf error");
-	proc->user_name = strdup(name);	
-
-	//cmdline parse
-	sprintf(cmd, "cat /proc/%d/cmdline", pid);
-	fc = open_fs(fc, cmd);
-	buf[0] = '\0';
-	fgets(buf, BUFF_SIZE, fc);
-	if (strlen(buf) == 0)
-		proc->cmd_line = strdup("");
-	else
-		proc->cmd_line = strdup(buf);
-		*/
-
+	
 	pclose(fs);
 	return (proc);
 }
@@ -253,8 +213,6 @@ void *pth_parse_process(void *pro)
 			}
 			insert_proc(pid, proc);
 		}
-		else
-			break ; //이후로는 Pid가 안나오므로
 	}
 	
 	return ((void*)0);
