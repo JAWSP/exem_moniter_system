@@ -18,7 +18,7 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 	(*cpu)->cf = NULL;
 	(*mem)->mf = NULL;
 	(*pack)->nf = NULL;
-	(*proc)->pf = NULL;
+	(*proc)->dir = NULL;
 
 	(*pack)->inter = NULL;
 	(*pack)->next = NULL;
@@ -105,19 +105,15 @@ int main(void)
 			init_structs(&cpu, &mem, &pack, &proc);
 		
 			cpu->cf = open_fs(cpu->cf, "/proc/stat");
-		//	parse_cpu(cpu);
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
 		
 			mem->mf = open_fs(mem->mf, "/proc/meminfo");
-		//	parse_mem(mem);
 			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 
 			pack->nf = open_fs(pack->nf, "/proc/net/dev");
-		//	parse_packet(pack);
 			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
 
-			proc->pf = read_cmd(proc->pf, "ls /proc");
-		//	parse_process(proc);
+			proc->dir = open_dir(proc->dir, "/proc");
 			pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
 			
 			pthread_join(pid_c, 0);
@@ -140,7 +136,7 @@ int main(void)
 		pclose(cpu->cf);
 		pclose(mem->mf);
 		pclose(pack->nf);
-		pclose(proc->pf);
+		closedir(proc->dir);
 
         return (0);
 }

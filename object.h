@@ -6,6 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #define BUFF_SIZE 1024
 
@@ -62,7 +65,7 @@ typedef struct s_process
 	int cpu_time;
 	char *user_name;
 	char *cmd_line;
-	FILE *pf;
+	DIR *dir;
 	struct s_process *next;
 } procInfo;
 
@@ -80,6 +83,7 @@ void *pth_parse_process(void *pro);
 void err_by(char *reason);
 FILE *read_cmd(FILE *fp, char *cmd); //fopen사용에 따라 사라질 예정
 FILE *open_fs(FILE *fs, char *root);
+DIR *open_dir(DIR *dir, char *root);
 
 //index_utils.c
 int indx_space(char *line, int i);

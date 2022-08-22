@@ -31,3 +31,12 @@ FILE *open_fs(FILE *fs, char *root)
         //    printf("%s", buf);
 		return (fs);
 }
+
+DIR *open_dir(DIR *dir, char *root)
+{
+	    dir = opendir(root);
+        if (dir == NULL)
+            err_by("diropen failed");
+
+		return (dir);
+}

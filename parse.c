@@ -12,7 +12,6 @@ void *pth_parse_cpu(void *cp)
 	fgets(buf, BUFF_SIZE, fs);
 	if (ferror(fs))
 		err_by("stat parse error");
-
 	i = indx_go_next(buf, i);
 	//get user time
 	cpu->usr = indx_get_num(buf, i);
@@ -66,32 +65,6 @@ void *pth_parse_mem(void *me)
 	}	
 		if (ferror(fs))
 			err_by("mem parse error");
-	/*
-	//원하고자 하는 정보는 2번째 줄에 있으니 
-	//개행까지 읽어들이는 fgets를 2번 불러온다
-	fgets(buf, BUFF_SIZE, fs);
-	fgets(buf, BUFF_SIZE, fs);
-	if (ferror(fs))
-		err_by("mem parse error");
-
-	i = indx_go_next(buf, i);
-	mem->total = indx_get_num(buf, i);
-	i = indx_go_next(buf, i);
-	mem->used = indx_get_num(buf, i);
-	//free영역은 그대로 측정해야 할까?
-	//아님 위의 두개의 값의 차이를 넣어야 할까?
-	i = indx_go_next(buf, i);
-	mem->free = indx_get_num(buf, i); //현재 mem 영역
-
-	i = 0;
-	fgets(buf, BUFF_SIZE, fs);
-	if (ferror(fs))
-		err_by("swap_mem parse error");
-	i = indx_go_next(buf, i);
-	mem->swap_total = indx_get_num(buf, i);
-	i = indx_go_next(buf, i);
-	mem->swap_used = indx_get_num(buf, i); //swap mem영역
-	*/
 	
 	return ((void*)0);
 }
@@ -152,21 +125,69 @@ void *pth_parse_packet(void *pac)
 
 procInfo *insert_proc(int pid, procInfo *proc)
 {
-	//TODO 함수를 쪼개야 함
-	FILE *fc = NULL;
+	FILE *fs = NULL;
+	struct passwd pwd;
+    struct passwd *result;
 	char cmd[40], buf[BUFF_SIZE], name[BUFF_SIZE];
-	int utime, stime;
+	int utime, stime, uid;
+	int i = 0;
+	//TODO stat->status로 바꾸기 
+	//TODO 그에 따른 파싱 방식 바꾸기
+	//TODO 경과시간 jiffies으로 나누어서 구하시오
 
 	//stat parse
+	
+	//get pid,ppid,raw name
+	sprintf(cmd, "cat /proc/%d/status", pid);
+	fs = open_fs(fs, cmd);
+	while (fgets(buf, BUFF_SIZE, fs) != 0)
+	{
+		if (i == 0)
+		{
+			if (!sscanf(buf, "%*s %s", name))
+				err_by("process name sscanf error");
+			proc->name = strdup(name);
+		}
+		else if (i == 5)
+		{
+			if (!sscanf(buf, "%*s %d", &proc->pid))
+				err_by("process pid sscanf error");
+		}
+		else if (i == 6)
+		{
+			if (!sscanf(buf, "%*s %d", &proc->ppid))
+				err_by("process ppid sscanf error");
+		}
+		else if (i == 8)
+		{
+			if (!sscanf(buf, "%*s %d", &uid))
+				err_by("process uid sscanf error");
+			getpwuid_r(uid, &pwd, name, BUFF_SIZE, &result);
+			if (result == NULL)
+				err_by("getpwuid_r error");
+			proc->user_name = strdup(pwd.pw_name);
+			break ;
+		}
+		i++;
+	}
+
+	//cpu time은 stat에 위치해있다
+	i = 0;
 	sprintf(cmd, "cat /proc/%d/stat", pid);
-	fc = read_cmd(fc, cmd);
+	fs = open_fs(fs, cmd);
+	for (int count = 0; count < 14; count++)
+		i = indx_go_next(buf, i);
+	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
+		err_by("process cputime  sscanf error");
+	proc->cpu_time = utime + stime;
+	/*
 	fgets(buf, BUFF_SIZE, fc);
 	if (ferror(fc))
 		err_by("proc/pidstat get error");
 	if (!sscanf(buf, "%d %s %*s %d", &proc->pid, name, &proc->ppid))
 		err_by("proc/pid/stat sscanf error");
 
-	//get name
+	//get name except ()
 	name[strlen(name) -1] = '\0';
 	proc->name = strdup(&name[1]);
 
@@ -176,7 +197,6 @@ procInfo *insert_proc(int pid, procInfo *proc)
 		i = indx_go_next(buf, i);
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
 		err_by("process cputime  sscanf error");
-	//TODO 경과시간 jiffies으로 나누어서 구하시오
 	proc->cpu_time = utime + stime;
 
 	//username parse	
@@ -192,31 +212,29 @@ procInfo *insert_proc(int pid, procInfo *proc)
 
 	//cmdline parse
 	sprintf(cmd, "cat /proc/%d/cmdline", pid);
-	fc = read_cmd(fc, cmd);
+	fc = open_fs(fc, cmd);
 	buf[0] = '\0';
 	fgets(buf, BUFF_SIZE, fc);
 	if (strlen(buf) == 0)
-		proc->cmd_line = strdup("NULL");
+		proc->cmd_line = strdup("");
 	else
 		proc->cmd_line = strdup(buf);
+		*/
 
-	pclose(fc);
+	pclose(fs);
 	return (proc);
 }
 
 void *pth_parse_process(void *pro)
 {
 	procInfo *proc = pro;
-	char buf[BUFF_SIZE];
+	struct dirent *buf = NULL;
 	int pid = 0;
-	FILE *fs = proc->pf;
+	DIR *dir = proc->dir;
 
-	while (!feof(fs))
+	while ((buf = readdir(dir)) != NULL)
 	{
-		fgets(buf, BUFF_SIZE, fs);
-		if (ferror(fs))
-			err_by("pid parse error");
-		if ((pid = atoi(buf)) > 0)
+		if ((pid = atoi(buf->d_name)) > 0)
 		{
 			if (proc->name)
 			{
