@@ -131,8 +131,6 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	char cmd[40], buf[BUFF_SIZE], name[BUFF_SIZE];
 	int utime, stime, uid;
 	int i = 0;
-	//TODO stat->status로 바꾸기 
-	//TODO 그에 따른 파싱 방식 바꾸기
 	//TODO 경과시간 jiffies으로 나누어서 구하시오
 
 	//stat parse
@@ -176,7 +174,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	buf[0] = '\0';
 	sprintf(cmd, "/proc/%d/stat", pid);
 	fs = open_fs(fs, cmd);
-	for (int count = 0; count < 14; count++)
+	for (int count = 0; count < 13; count++)
 		i = indx_go_next(buf, i);
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))
 		err_by("process cputime  sscanf error");
@@ -192,7 +190,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	else
 		proc->cmd_line = strdup(buf);
 
-	pclose(fs);
+	fclose(fs);
 	return (proc);
 }
 

@@ -133,10 +133,11 @@ int main(void)
 			pack_free(&pack);
 			proc_free(&proc);
 
+			usleep(1000 * 1000);
 		}	
-		pclose(cpu->cf);
-		pclose(mem->mf);
-		pclose(pack->nf);
+		fclose(cpu->cf);
+		fclose(mem->mf);
+		fclose(pack->nf);
 		closedir(proc->dir);
 
         return (0);
