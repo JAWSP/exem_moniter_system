@@ -183,7 +183,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	proc->cpu_time = utime + stime;
 
 	//cmdline parse
-	sprintf(cmd, "cat /proc/%d/cmdline", pid);
+	sprintf(cmd, "/proc/%d/cmdline", pid);
 	fs = open_fs(fs, cmd);
 	buf[0] = '\0';
 	fgets(buf, BUFF_SIZE, fs);
