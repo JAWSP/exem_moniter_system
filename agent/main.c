@@ -105,8 +105,8 @@ int main(void)
 		//TODO 이쪽에 socket생성
 
 		//요 whilea문을 부수는게 맞을까?
-		while (1)
-		{
+//		while (1)
+//		{
 			init_structs(&cpu, &mem, &pack, &proc);
 			
 		
@@ -132,35 +132,29 @@ int main(void)
 			//->따로따로 보내되 조회를 할때면 아다리 맞게 보내면 되지 않을까 한다
 			//그런데 여기서 안이라 함은 여기 while문 안에서 넣으라는건가..?
 			
-			/*
-			pthread_join(pid_c, 0);
-			pthread_join(pid_m, 0);
-			pthread_join(pid_n, 0);
-			pthread_join(pid_p, 0);
-			*/
-			test(cpu, mem, pack, proc);	
+//			test(cpu, mem, pack, proc);	
 			/*
 			여기서 보낸다 send
 			여기서 패킷을 여러번번 보낸다는건 send를 여러본 뿌린다는 의미일 것 같음
 			*/
 
-			fclose(cpu->cf);
-			fclose(mem->mf);
-			fclose(pack->nf);
-			closedir(proc->dir);
+//			fclose(cpu->cf);
+//			fclose(mem->mf);
+//			fclose(pack->nf);
+//			closedir(proc->dir);
 
 
 			//닫기
 
-			free(cpu);
-			cpu = NULL;
-			free(mem);
-			mem = NULL;
-			pack_free(&pack);
-			proc_free(&proc);
+//			free(cpu);
+//			cpu = NULL;
+//			free(mem);
+//			mem = NULL;
+//			pack_free(&pack);
+//			proc_free(&proc);
 
-			usleep(1000 * 1000);
-		}	
+//			usleep(1000 * 1000);
+	//	} //main while	
 
 
         return (0);

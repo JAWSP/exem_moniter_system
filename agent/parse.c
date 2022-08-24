@@ -5,27 +5,35 @@ TODO
 해당 스레드를 죽이지 않고 지속적으로 살려야 한다
 싱크 -> 걸린시간의 차를 이용하여 특정 시간대에 맞게 설정해야 하고
 그러면서 한번 수집이 끝났으면 각각 패킷에 넣으면 됨
+근데 접속이 끊겨도 그대로 전달해주기 위한 큐(혹은 연결리스트)가 필요하게됨
+->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
 void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
 	char buf[BUFF_SIZE];
+	FILE *fs = NULL;
+	int i = 0;
+	double diff_usec = 0;
+	struct timeval startTime, endTime;
+
 	while (1)
 	{
-		int i = 0;
-		FILE *fs = cpu->cf;
-		struct timeval startTime, endTime;
+		//먼저 초기화 할껀 초기화
+		i = 0;
+		diff_usec = 0;
 	//	double diff_sec; ->1초를 기준으로 한다면 그다지 필요없을듯해보임
-    	double diff_usec;
 
-		gettimeofday(&startTime, NULL);	
+		//측정 시작
+		gettimeofday(&startTime, NULL);
+		cpu->cf = open_fs(cpu->cf, "/proc/stat");
 
 		fgets(buf, BUFF_SIZE, fs);
 		if (ferror(fs))
 			err_by("stat parse error");
 
-		for (int count = 0; count < 9; count++)
+		for (int count = 0; count < 6; count++)
 		{
 			if (count == 1)
 				cpu->usr = indx_get_num(buf, i);
@@ -35,17 +43,21 @@ void *pth_parse_cpu(void *cp)
 				cpu->idle = indx_get_num(buf, i);
 			else if (count == 5)
 				cpu->iowait = indx_get_num(buf, i);
-			else if (count >= 6)
-				break ;	
 			i = indx_go_next(buf, i);
 		}
+		//시험
+		//아마 요부분에서 얼추 큐에 넣든 패킷에 바로넣든 결정이 될 듯싶다
+		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+
+		fclose(fs);
+
+		//측정 끝
 		gettimeofday(&endTime, NULL);
 //		diff_sec = (endTime.tv_sec - startTime.tv_sec);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
-		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
-		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-		usleep ((1000 * 1000) - diff_usec);
 
+		usleep ((1000 * 1000) - diff_usec);
 	}//cpu while
 
 	return ((void*)0);
