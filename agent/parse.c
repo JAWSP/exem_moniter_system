@@ -9,6 +9,7 @@ TODO
 ->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
+/*
 void pack_free(packUsage **head)
 {
     packUsage *del = NULL;
@@ -45,6 +46,7 @@ void proc_free(procInfo **head)
     }
 	*head = NULL;
 }
+*/
 
 
 void *pth_parse_cpu(void *cp)

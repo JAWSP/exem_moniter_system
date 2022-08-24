@@ -6,15 +6,6 @@ void err_by(char *reason)
 	exit(-1);
 }
 
-FILE *read_cmd(FILE *fp, char *cmd)
-{
-	fp = popen(cmd, "r");
-	if (fp == NULL)
-		err_by("popen failed");
-
-	return (fp);
-}
-
 FILE *open_fs(FILE *fs, char *root)
 {
 	fs = fopen(root, "r");
@@ -31,4 +22,41 @@ DIR *open_dir(DIR *dir, char *root)
 		err_by("diropen failed");
 
 	return (dir);
+}
+
+void pack_free(packUsage **head)
+{
+    packUsage *del = NULL;
+    packUsage *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		free(del->inter);
+		del->inter = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
+}
+
+void proc_free(procInfo **head)
+{
+    procInfo *del = NULL;
+    procInfo *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		//인자들 free
+		free(del->name);
+		del->name = NULL;
+		free(del->user_name);
+		del->user_name = NULL;
+		free(del->cmd_line);
+		del->cmd_line = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
 }
