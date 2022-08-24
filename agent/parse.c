@@ -27,7 +27,7 @@ void *pth_parse_cpu(void *cp)
 
 		//측정 시작
 		gettimeofday(&startTime, NULL);
-		fs = open_fs(cpu->cf, "/proc/stat");
+		fs = open_fs(fs, "/proc/stat");
 
 		fgets(buf, BUFF_SIZE, fs);
 		if (ferror(fs))
@@ -67,41 +67,59 @@ void *pth_parse_mem(void *me)
 {
 	memUsage *mem = me;
 	char buf[BUFF_SIZE];
-	int i = 0;
+	int i;
 	FILE *fs = mem->mf;
+	double diff_usec = 0;
+	struct timeval startTime, endTime;
 	
-	while (fgets(buf, BUFF_SIZE, fs))
+	gettimeofday(&startTime, NULL);
+	while (1)
 	{
-		if (i == 0)
+		i = 0;
+		diff_usec = 0;
+
+		fs = open_fs(fs, "/proc/stat");
+		while (fgets(buf, BUFF_SIZE, fs))
 		{
-			if (!sscanf(buf, "%*s %d", &mem->total))
-				err_by("total mem  sscanf error");
-		}
-		else if (i == 1)
-		{
-			if (!sscanf(buf, "%*s %d", &mem->free))
-				err_by("free mem sscanf error");
-			mem->used = mem->total - mem->free;
-		}
-		else if (i == 14)
-		{
-			if (!sscanf(buf, "%*s %d", &mem->swap_total))
-				err_by("swap total mem sscanf error");
-		}
-		else if (i == 15)
-		{
-			int tmp;
-			if (!sscanf(buf, "%*s %d", &tmp))
-				err_by("swap free sscanf error");
-			mem->swap_used = mem->swap_total - tmp;
-		}
-		else if (i >= 16)
-			break ;
-		i++;
-	}	
+			if (i == 0)
+			{
+				if (!sscanf(buf, "%*s %d", &mem->total))
+					err_by("total mem  sscanf error");
+			}
+			else if (i == 1)
+			{
+				if (!sscanf(buf, "%*s %d", &mem->free))
+					err_by("free mem sscanf error");
+				mem->used = mem->total - mem->free;
+			}
+			else if (i == 14)
+			{
+				if (!sscanf(buf, "%*s %d", &mem->swap_total))
+					err_by("swap total mem sscanf error");
+			}
+			else if (i == 15)
+			{
+				int tmp;
+				if (!sscanf(buf, "%*s %d", &tmp))
+					err_by("swap free sscanf error");
+				mem->swap_used = mem->swap_total - tmp;
+			}
+			else if (i >= 16)
+				break ;
+			i++;
+		}// mem parse roop	
+		
 		if (ferror(fs))
 			err_by("mem parse error");
-	
+
+		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
+				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
+
+		gettimeofday(&endTime, NULL);
+    	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
+		usleep ((1000 * 1000) - diff_usec);	
+	}//mem roop
+
 	return ((void*)0);
 }
 

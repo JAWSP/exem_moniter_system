@@ -98,9 +98,9 @@ int main(void)
 		procInfo *proc = NULL;
 		
 		pthread_t pid_c;
-	//	pthread_t pid_m;
-	//	pthread_t pid_n;
-	//	pthread_t pid_p;
+		pthread_t pid_m;
+		pthread_t pid_n;
+		pthread_t pid_p;
 
 		//TODO 이쪽에 socket생성
 
@@ -112,16 +112,15 @@ int main(void)
 		
 	//		cpu->cf = open_fs(cpu->cf, "/proc/stat");
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
-			/*
-			mem->mf = open_fs(mem->mf, "/proc/meminfo");
+			
+		//	mem->mf = open_fs(mem->mf, "/proc/meminfo");
 			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 
-			pack->nf = open_fs(pack->nf, "/proc/net/dev");
-			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
+		//	pack->nf = open_fs(pack->nf, "/proc/net/dev");
+		//	pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
 
-			proc->dir = open_dir(proc->dir, "/proc");
-			pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
-			*/
+		//	proc->dir = open_dir(proc->dir, "/proc");
+		//	pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
 			//TODOTODOTODOTODOTODOTODO
 			//->이렇게 쓰레드를 놓고 시작하고끄고 하게 되면 너무 비효율적
 			//그래서 여기 루프 밖에서 스레드를 돌리지 말고 안에서 멀티 스레드를 돌려야함
