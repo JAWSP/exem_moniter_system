@@ -11,23 +11,42 @@ void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
 	char buf[BUFF_SIZE];
-	int i = 0;
-	FILE *fs = cpu->cf;
+	while (1)
+	{
+		int i = 0;
+		FILE *fs = cpu->cf;
+		struct timeval startTime, endTime;
+	//	double diff_sec; ->1초를 기준으로 한다면 그다지 필요없을듯해보임
+    	double diff_usec;
 
-	fgets(buf, BUFF_SIZE, fs);
-	if (ferror(fs))
-		err_by("stat parse error");
-	i = indx_go_next(buf, i);
-	//get user time
-	cpu->usr = indx_get_num(buf, i);
-	i = indx_go_next(buf, i);
-	i = indx_go_next(buf, i);
-	//sys는 3번째에 위치해있으니 첫번째 위치에서 2번넘긴다
-	cpu->sys = indx_get_num(buf, i);
-	i = indx_go_next(buf, i);
-	cpu->idle = indx_get_num(buf, i);
-	i = indx_go_next(buf, i);
-	cpu->iowait = indx_get_num(buf, i);
+		gettimeofday(&startTime, NULL);	
+
+		fgets(buf, BUFF_SIZE, fs);
+		if (ferror(fs))
+			err_by("stat parse error");
+
+		for (int count = 0; count < 9; count++)
+		{
+			if (count == 1)
+				cpu->usr = indx_get_num(buf, i);
+			else if (count == 3)
+				cpu->sys = indx_get_num(buf, i);
+			else if (count == 4)
+				cpu->idle = indx_get_num(buf, i);
+			else if (count == 5)
+				cpu->iowait = indx_get_num(buf, i);
+			else if (count >= 6)
+				break ;	
+			i = indx_go_next(buf, i);
+		}
+		gettimeofday(&endTime, NULL);
+//		diff_sec = (endTime.tv_sec - startTime.tv_sec);
+    	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
+		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+		usleep ((1000 * 1000) - diff_usec);
+
+	}//cpu while
 
 	return ((void*)0);
 }

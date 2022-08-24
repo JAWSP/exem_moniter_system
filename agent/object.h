@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <pwd.h>
 
 #define BUFF_SIZE 1024
@@ -19,6 +20,16 @@
  */
 
 //OS사용 부분을 합친부분을 쓸지는 일단 보류
+
+//임시로 만들 전역변수
+/*
+typedef struct s_lobal
+{
+	struct timeval start_time;
+	int tmp;
+} g_lobal;
+*/
+
 typedef struct s_data
 {
 	struct s_cpuUsage *cpu;

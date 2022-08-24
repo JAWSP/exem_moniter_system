@@ -1,6 +1,6 @@
 #include "object.h"
 
-void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **proc)
+void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **proc )
 {
 	*cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
 	if (!*(cpu))
@@ -96,10 +96,11 @@ int main(void)
 		memUsage *mem = NULL;
 		packUsage *pack = NULL;
 		procInfo *proc = NULL;
+		
 		pthread_t pid_c;
-		pthread_t pid_m;
-		pthread_t pid_n;
-		pthread_t pid_p;
+	//	pthread_t pid_m;
+	//	pthread_t pid_n;
+	//	pthread_t pid_p;
 
 		//TODO 이쪽에 socket생성
 
@@ -111,7 +112,7 @@ int main(void)
 		
 			cpu->cf = open_fs(cpu->cf, "/proc/stat");
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
-		
+			/*
 			mem->mf = open_fs(mem->mf, "/proc/meminfo");
 			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 
@@ -120,6 +121,7 @@ int main(void)
 
 			proc->dir = open_dir(proc->dir, "/proc");
 			pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
+			*/
 			//TODOTODOTODOTODOTODOTODO
 			//->이렇게 쓰레드를 놓고 시작하고끄고 하게 되면 너무 비효율적
 			//그래서 여기 루프 밖에서 스레드를 돌리지 말고 안에서 멀티 스레드를 돌려야함
@@ -130,11 +132,12 @@ int main(void)
 			//->따로따로 보내되 조회를 할때면 아다리 맞게 보내면 되지 않을까 한다
 			//그런데 여기서 안이라 함은 여기 while문 안에서 넣으라는건가..?
 			
-			
+			/*
 			pthread_join(pid_c, 0);
 			pthread_join(pid_m, 0);
 			pthread_join(pid_n, 0);
 			pthread_join(pid_p, 0);
+			*/
 			test(cpu, mem, pack, proc);	
 			/*
 			여기서 보낸다 send
