@@ -14,12 +14,7 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 	*proc = (procInfo*)malloc(sizeof(procInfo));
 	if (!(*proc))
 		err_by("malloc_error");
-
-	(*cpu)->cf = NULL;
-	(*mem)->mf = NULL;
-	(*pack)->nf = NULL;
-	(*proc)->dir = NULL;
-
+	
 	(*pack)->inter = NULL;
 	(*pack)->next = NULL;
 	(*proc)->name = NULL;
@@ -107,9 +102,7 @@ int main(void)
 		//요 whilea문을 부수는게 맞을까?
 //		while (1)
 //		{
-			init_structs(&cpu, &mem, &pack, &proc);
-			
-		
+//			init_structs(&cpu, &mem, &pack, &proc);
 	//		cpu->cf = open_fs(cpu->cf, "/proc/stat");
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
 			
@@ -117,7 +110,7 @@ int main(void)
 			pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 
 		//	pack->nf = open_fs(pack->nf, "/proc/net/dev");
-		//	pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
+			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
 
 		//	proc->dir = open_dir(proc->dir, "/proc");
 		//	pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);

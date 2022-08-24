@@ -9,6 +9,44 @@ TODO
 ->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
+void pack_free(packUsage **head)
+{
+    packUsage *del = NULL;
+    packUsage *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		free(del->inter);
+		del->inter = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
+}
+
+void proc_free(procInfo **head)
+{
+    procInfo *del = NULL;
+    procInfo *tmp = *head;
+    while (tmp)
+    {
+        del = tmp;
+        tmp = tmp->next;
+		//인자들 free
+		free(del->name);
+		del->name = NULL;
+		free(del->user_name);
+		del->user_name = NULL;
+		free(del->cmd_line);
+		del->cmd_line = NULL;
+        free(del);
+		del = NULL;
+    }
+	*head = NULL;
+}
+
+
 void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
@@ -23,6 +61,9 @@ void *pth_parse_cpu(void *cp)
 		//먼저 초기화 할껀 초기화
 		i = 0;
 		diff_usec = 0;
+		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
+		if (!cpu)
+			err_by("malloc_error");
 	//	double diff_sec; ->1초를 기준으로 한다면 그다지 필요없을듯해보임
 
 		//측정 시작
@@ -51,6 +92,8 @@ void *pth_parse_cpu(void *cp)
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
 
 		fclose(fs);
+		free(cpu);
+		cpu = NULL;
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
@@ -77,6 +120,9 @@ void *pth_parse_mem(void *me)
 		i = 0;
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
+		mem = (memUsage*)malloc(sizeof(memUsage));
+		if (!mem)
+			err_by("malloc_error");
 
 		fs = open_fs(fs, "/proc/meminfo");
 		while (fgets(buf, BUFF_SIZE, fs))
@@ -116,6 +162,9 @@ void *pth_parse_mem(void *me)
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
 		
 		fclose(fs);
+		free(mem);
+		mem = NULL;
+
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -159,6 +208,11 @@ void *pth_parse_packet(void *pac)
 		i = 0;
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
+		pack = (packUsage*)malloc(sizeof(packUsage));
+		if (!pack)
+			err_by("malloc_error");
+		(pack)->inter = NULL;
+		(pack)->next = NULL;
 
 		fs = open_fs(fs, "/proc/net/dev");
 		fgets(buf, BUFF_SIZE, fs);
@@ -186,6 +240,8 @@ void *pth_parse_packet(void *pac)
 		}
 		
 		fclose(fs);
+
+
 		packUsage *tmp = pack;
 		while (tmp && tmp->inter)
 		{
@@ -193,6 +249,9 @@ void *pth_parse_packet(void *pac)
 					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
 			tmp = tmp->next;
 		}
+		//이거 이따가 좀 초기화 시켜야 할듯
+		
+		pack_free(&pack);
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -280,30 +339,34 @@ void *pth_parse_process(void *pro)
 	procInfo *proc = pro;
 	struct dirent *buf = NULL;
 	int pid = 0;
-	DIR *dir = proc->dir;
+	DIR *dir = NULL;
 
-	while ((buf = readdir(dir)) != NULL)
+	while (1)
 	{
-		if ((pid = atoi(buf->d_name)) > 0)
+		while ((buf = readdir(dir)) != NULL)
 		{
-			if (proc->name)
+			if ((pid = atoi(buf->d_name)) > 0)
 			{
-				procInfo *new;
-				procInfo *tmp = proc;
-				new = (procInfo*)malloc(sizeof(procInfo));
-				if (!new)
-					err_by("new pack malloc_error");
-				new->name = NULL;
-				new->next = NULL;
-				insert_proc(pid, new);
-				while (tmp->next)
-					tmp = tmp->next;
-				tmp->next = new;
-				continue ;
+				if (proc->name)
+				{
+					procInfo *new;
+					procInfo *tmp = proc;
+					new = (procInfo*)malloc(sizeof(procInfo));
+					if (!new)
+						err_by("new pack malloc_error");
+					new->name = NULL;
+					new->next = NULL;
+					insert_proc(pid, new);
+					while (tmp->next)
+						tmp = tmp->next;
+					tmp->next = new;
+					continue ;
+				}
+				insert_proc(pid, proc);
 			}
-			insert_proc(pid, proc);
 		}
-	}
-	
+
+		proc_free(&proc);
+	}//proc roop
 	return ((void*)0);
 }

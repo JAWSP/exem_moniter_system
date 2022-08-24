@@ -44,7 +44,6 @@ typedef struct s_cpuUsage
 	int sys;
 	int iowait;
 	int idle;
-	FILE *cf;
 } cpuUsage;
 
 typedef struct s_memUsage
@@ -54,7 +53,6 @@ typedef struct s_memUsage
 	int used;
 	int swap_total;
 	int swap_used;
-	FILE *mf;
 } memUsage;
 
 typedef struct s_packUsage
@@ -64,7 +62,6 @@ typedef struct s_packUsage
 	int in_packets;
 	int out_bytes;
 	int out_packets;
-	FILE *nf;
 	struct s_packUsage *next;
 } packUsage;
 
@@ -76,7 +73,6 @@ typedef struct s_process
 	int cpu_time;
 	char *user_name;
 	char *cmd_line;
-	DIR *dir;
 	struct s_process *next;
 } procInfo;
 
