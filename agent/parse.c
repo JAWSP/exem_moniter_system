@@ -14,7 +14,7 @@ void *pth_parse_cpu(void *cp)
 	cpuUsage *cpu = cp;
 	char buf[BUFF_SIZE];
 	FILE *fs = NULL;
-	int i = 0;
+	int i;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 
@@ -68,7 +68,7 @@ void *pth_parse_mem(void *me)
 	memUsage *mem = me;
 	char buf[BUFF_SIZE];
 	int i;
-	FILE *fs = mem->mf;
+	FILE *fs = NULL;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	
@@ -78,7 +78,7 @@ void *pth_parse_mem(void *me)
 		i = 0;
 		diff_usec = 0;
 
-		fs = open_fs(fs, "/proc/stat");
+		fs = open_fs(fs, "/proc/meminfo");
 		while (fgets(buf, BUFF_SIZE, fs))
 		{
 			if (i == 0)
@@ -114,6 +114,8 @@ void *pth_parse_mem(void *me)
 
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
+		
+		fclose(fs);
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -146,32 +148,54 @@ void *pth_parse_packet(void *pac)
 {
 	packUsage *pack = pac;
 	char buf[BUFF_SIZE];
-	FILE *fs = pack->nf;
+	int i;
+	FILE *fs = NULL;
+	double diff_usec = 0;
+	struct timeval startTime, endTime;
 	
 	//원하고자 하는 내용은 3번째 줄에 있다
-	fgets(buf, BUFF_SIZE, fs);
-	fgets(buf, BUFF_SIZE, fs);
-	while (fgets(buf, BUFF_SIZE, fs) != 0)
+	while (1)
 	{
-		if (ferror(fs))
-			err_by("net socket parse error");
-		if (pack->inter)
+		i = 0;
+		diff_usec = 0;
+
+		fs = open_fs(fs, "/proc/net/dev");
+		fgets(buf, BUFF_SIZE, fs);
+		fgets(buf, BUFF_SIZE, fs);
+		while (fgets(buf, BUFF_SIZE, fs) != 0)
 		{
-			packUsage *new;
-			packUsage *tmp = pack;
-			new = (packUsage*)malloc(sizeof(packUsage));
-			if (!new)
-				err_by("new pack malloc_error");
-			new->inter = NULL;
-			new->next = NULL;
-			insert_packet(buf, new);
-			while (tmp->next)
-				tmp = tmp->next;
-			tmp->next = new;
-			//대충 새로운 노드를 만들어서 뒤에 붙이는 함수
+			if (ferror(fs))
+				err_by("net socket parse error");
+			if (pack->inter)
+			{
+				packUsage *new;
+				packUsage *tmp = pack;
+				new = (packUsage*)malloc(sizeof(packUsage));
+				if (!new)
+					err_by("new pack malloc_error");
+				new->inter = NULL;
+				new->next = NULL;
+				insert_packet(buf, new);
+				while (tmp->next)
+					tmp = tmp->next;
+				tmp->next = new;
+			}
+			else
+				insert_packet(buf, pack);
 		}
-		else
-			insert_packet(buf, pack);
+		
+		fclose(fs);
+		packUsage *tmp = pack;
+		while (tmp && tmp->inter)
+		{
+			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n",
+					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
+			tmp = tmp->next;
+		}
+
+		gettimeofday(&endTime, NULL);
+    	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
+		usleep ((1000 * 1000) - diff_usec);	
 	}
 	
 	return ((void*)0);

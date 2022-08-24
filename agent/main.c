@@ -141,9 +141,6 @@ int main(void)
 			여기서 패킷을 여러번번 보낸다는건 send를 여러본 뿌린다는 의미일 것 같음
 			*/
 
-//			fclose(cpu->cf);
-//			fclose(mem->mf);
-//			fclose(pack->nf);
 //			closedir(proc->dir);
 
 
