@@ -1,6 +1,6 @@
 NAME = monitor
-MAIN = main.c
-SRCS = utils.c index_utils.c parse.c
+MAIN = agent/main.c
+SRCS = agent/utils.c agent/index_utils.c agent/parse.c
 #MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}
@@ -18,6 +18,7 @@ $(NAME) : ${OBJS}
 	${CC} ${PTHREAD} ${MAIN} ${SRCS} -o ${NAME}
 	${RM} ${OBJS}
 	@echo "\033[33m[monitor                                  by juhaprk]\033[0m"
+	@echo "\033[33m[    input \033[32m./monitor\033[33m to start this application      ]\033[0m"
 
 .c.o :
 	${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
