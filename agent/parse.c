@@ -340,9 +340,21 @@ void *pth_parse_process(void *pro)
 	struct dirent *buf = NULL;
 	int pid = 0;
 	DIR *dir = NULL;
+	double diff_usec = 0;
+	struct timeval startTime, endTime;
 
 	while (1)
 	{
+		diff_usec = 0;
+	
+		proc = (procInfo*)malloc(sizeof(procInfo));
+		if (proc)
+			err_by("malloc_error");	
+		proc->name = NULL;
+		proc->next = NULL;
+		gettimeofday(&startTime, NULL);
+
+		dir = open_dir(dir, "/proc");
 		while ((buf = readdir(dir)) != NULL)
 		{
 			if ((pid = atoi(buf->d_name)) > 0)
@@ -365,6 +377,11 @@ void *pth_parse_process(void *pro)
 				insert_proc(pid, proc);
 			}
 		}
+		closedir(dir);
+		
+		gettimeofday(&endTime, NULL);
+    	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
+		usleep ((1000 * 1000) - diff_usec);	
 
 		proc_free(&proc);
 	}//proc roop

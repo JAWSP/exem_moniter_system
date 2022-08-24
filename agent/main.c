@@ -1,5 +1,6 @@
 #include "object.h"
 
+/*
 void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **proc )
 {
 	*cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
@@ -20,7 +21,9 @@ void init_structs(cpuUsage **cpu, memUsage **mem, packUsage **pack, procInfo **p
 	(*proc)->name = NULL;
 	(*proc)->next = NULL;
 }
+*/
 
+/*
 void pack_free(packUsage **head)
 {
     packUsage *del = NULL;
@@ -57,6 +60,7 @@ void proc_free(procInfo **head)
     }
 	*head = NULL;
 }
+*/
 
 void test(cpuUsage *cpu, memUsage *mem, packUsage *pack, procInfo *proc)
 {
@@ -113,7 +117,7 @@ int main(void)
 			pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
 
 		//	proc->dir = open_dir(proc->dir, "/proc");
-		//	pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
+			pthread_create(&pid_p, NULL, pth_parse_process, (void *)proc);
 			//TODOTODOTODOTODOTODOTODO
 			//->이렇게 쓰레드를 놓고 시작하고끄고 하게 되면 너무 비효율적
 			//그래서 여기 루프 밖에서 스레드를 돌리지 말고 안에서 멀티 스레드를 돌려야함
@@ -128,6 +132,9 @@ int main(void)
 			//이걸 안쓰면 main에서 먼저 끝내게 됨
 			//그리고 스레드는 무한으로 돌아서 메인-서브 스레드간의 동기화문제는 상솬없다고 생각
 			pthread_join(pid_c, NULL);
+			pthread_join(pid_m, NULL);
+			pthread_join(pid_n, NULL);
+			pthread_join(pid_p, NULL);
 //			test(cpu, mem, pack, proc);	
 			/*
 			여기서 보낸다 send
