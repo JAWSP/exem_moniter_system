@@ -72,11 +72,11 @@ void *pth_parse_mem(void *me)
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	
-	gettimeofday(&startTime, NULL);
 	while (1)
 	{
 		i = 0;
 		diff_usec = 0;
+		gettimeofday(&startTime, NULL);
 
 		fs = open_fs(fs, "/proc/meminfo");
 		while (fgets(buf, BUFF_SIZE, fs))
@@ -158,6 +158,7 @@ void *pth_parse_packet(void *pac)
 	{
 		i = 0;
 		diff_usec = 0;
+		gettimeofday(&startTime, NULL);
 
 		fs = open_fs(fs, "/proc/net/dev");
 		fgets(buf, BUFF_SIZE, fs);
