@@ -1,5 +1,12 @@
 #include "object.h"
 
+/*
+TODO
+해당 스레드를 죽이지 않고 지속적으로 살려야 한다
+싱크 -> 걸린시간의 차를 이용하여 특정 시간대에 맞게 설정해야 하고
+그러면서 한번 수집이 끝났으면 각각 패킷에 넣으면 됨
+*/
+
 void *pth_parse_cpu(void *cp)
 {
 	cpuUsage *cpu = cp;
