@@ -348,7 +348,7 @@ void *pth_parse_process(void *pro)
 		diff_usec = 0;
 	
 		proc = (procInfo*)malloc(sizeof(procInfo));
-		if (proc)
+		if (!proc)
 			err_by("malloc_error");	
 		proc->name = NULL;
 		proc->next = NULL;
@@ -378,6 +378,14 @@ void *pth_parse_process(void *pro)
 			}
 		}
 		closedir(dir);
+
+		procInfo *tmp2 = proc;
+		while (tmp2 && tmp2->name)
+		{
+			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
+					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
+			tmp2 = tmp2->next;
+		}
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
