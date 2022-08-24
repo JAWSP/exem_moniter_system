@@ -27,7 +27,7 @@ void *pth_parse_cpu(void *cp)
 
 		//측정 시작
 		gettimeofday(&startTime, NULL);
-		cpu->cf = open_fs(cpu->cf, "/proc/stat");
+		fs = open_fs(cpu->cf, "/proc/stat");
 
 		fgets(buf, BUFF_SIZE, fs);
 		if (ferror(fs))
