@@ -110,7 +110,7 @@ int main(void)
 			init_structs(&cpu, &mem, &pack, &proc);
 			
 		
-			cpu->cf = open_fs(cpu->cf, "/proc/stat");
+	//		cpu->cf = open_fs(cpu->cf, "/proc/stat");
 			pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
 			/*
 			mem->mf = open_fs(mem->mf, "/proc/meminfo");
@@ -132,6 +132,7 @@ int main(void)
 			//->따로따로 보내되 조회를 할때면 아다리 맞게 보내면 되지 않을까 한다
 			//그런데 여기서 안이라 함은 여기 while문 안에서 넣으라는건가..?
 			
+			pthread_join(pid_c, NULL);
 //			test(cpu, mem, pack, proc);	
 			/*
 			여기서 보낸다 send
