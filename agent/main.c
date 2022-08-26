@@ -59,12 +59,14 @@ int main(void)
 	int sock;
 	struct sockaddr_in agent_addr;
 
+	/*
 	cpuUsage *cpu = NULL;
 	memUsage *mem = NULL;
 	packUsage *pack = NULL;
 	procInfo *proc = NULL;
 	
 	pthread_t pid_c, pid_m, pid_n, pid_p;
+	*/
 
 	//TODO 이쪽에 socket생성
 	//그 뿐만 아니라 각종 초기화를 이쪽에서 하면 좋을 듯해보인다
@@ -78,13 +80,23 @@ int main(void)
 	agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	agent_addr.sin_port = htons(1234);
 
+	if (connect(sock, (struct sockaddr*)&agent_addr, sizeof(agent_addr)) == -1)
+		err_by("agent connect error");
+
+	for (int i = 0; i < 5; i++)
+		usleep(1000* 1000);
+	char *ex = strdup("asd\n");
+	send(sock, ex, strlen(ex), 0);
+	free(ex);
+	close(sock);
+
 
 	//요 whilea문을 부수는게 맞을까?
 //	while (1)
 //	{
 //		init_structs(&cpu, &mem, &pack, &proc);
 		
-		
+		/*
 		pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)cpu);
 		pthread_create(&pid_m, NULL, pth_parse_mem, (void *)mem);
 		pthread_create(&pid_n, NULL, pth_parse_packet, (void *)pack);
@@ -97,6 +109,7 @@ int main(void)
 		pthread_join(pid_m, NULL);
 		pthread_join(pid_n, NULL);
 		pthread_join(pid_p, NULL);
+		*/
 
 //		usleep(1000 * 1000);
 //	} //main while	
