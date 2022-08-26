@@ -9,9 +9,13 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #include <pwd.h>
+#include "../utils/utils.h"
 
 #define BUFF_SIZE 1024
+#define LOCAL_ADDR 2130706433
 
 
 /*
@@ -86,16 +90,8 @@ void *pth_parse_mem(void *me);
 void *pth_parse_packet(void *pac);
 void *pth_parse_process(void *pro);
 
-//util.c
-void err_by(char *reason);
-FILE *open_fs(FILE *fs, char *root);
-DIR *open_dir(DIR *dir, char *root);
+//agent_utils.c
 void pack_free(packUsage **head);
 void proc_free(procInfo **head);
-
-//index_utils.c
-int indx_space(char *line, int i);
-int indx_go_next(char *line, int i);
-int indx_get_num(char *line, int i); //sscanf를 이용함에따라 사라질 예정?
 
 # endif

@@ -1,4 +1,4 @@
-#include "object.h"
+#include "utils.h"
 
 //빈칸을 넘기는 함수
 int	indx_space(char *line, int i)
