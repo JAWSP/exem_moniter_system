@@ -55,8 +55,12 @@ int main()
 
 	agent_fd = accept_agent(sock);
 
-	recv(agent_fd, a_packet, 1024 * 128, 0);
-	test(a_packet);
+	int num;
+	recv(agent_fd, &num, sizeof(int), 0);
+	printf("a is %d\n", num);
+
+//	recv(agent_fd, a_packet, 1024 * 128, 0);
+//	test(a_packet);
 
 //	printf("buf : %lu\n", strlen(buf));
 //	if (strlen(buf) != 4)

@@ -25,7 +25,7 @@ void *pth_parse_cpu(void *socks)
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	packet *pack_c = NULL;
-	int *sock = (int*)socks;
+	int *sock = socks;
 
 	while (1)
 	{	
@@ -66,10 +66,13 @@ void *pth_parse_cpu(void *socks)
 		//여기서 왜 저런게 뜨는거지
 		pack_c->size = sizeof(pack_c);
 		pack_c->body = (void *)cpu;
-		printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
-	//	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
-	//	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-		if (send(*sock, pack_c, pack_c->size, 0) < 0)
+	//	printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
+		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+	//	if (send(*sock, pack_c, pack_c->size, 0) < 0)
+	//		err_by("cpu packet send error");
+		int a = 3;
+		if (send(*sock, &a, sizeof(int), 0) < 0)
 			err_by("cpu packet send error");
 
 		fclose(fs);
