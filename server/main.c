@@ -1,4 +1,6 @@
 #include "server.h"
+#include "../agent/object.h"
+#include "../agent/packets.h"
 
 int accept_agent(int sock)
 {
@@ -15,14 +17,24 @@ int accept_agent(int sock)
 	return (agent_fd);
 }
 
+void test(packet *a_packet)
+{	
+	cpuUsage *cpu = NULL;
+
+	cpu = a_packet->body;
+
+	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+}
+
 int main()
 {
 
 	int sock;
 	int res = 0;
 	int agent_fd;
-	char buf[1024];
-
+//	char buf[1024];
+	packet *a_packet = NULL;
 	struct sockaddr_in server_addr;
 
 	//통신 설정 초기 셋팅
@@ -43,17 +55,19 @@ int main()
 
 	agent_fd = accept_agent(sock);
 
-	recv(agent_fd, buf, 1024, 0);
-	printf("buf : %lu\n", strlen(buf));
-	if (strlen(buf) != 3)
-		printf("WTF\n");
-	int i = 0;
-	while (buf[i])
-		printf("%c\n", buf[i++]);
-	printf("recv : %s\n", buf);
+	recv(agent_fd, a_packet, 1024 * 128, 0);
+	test(a_packet);
 
-	close(sock);
-	close(agent_fd);
+//	printf("buf : %lu\n", strlen(buf));
+//	if (strlen(buf) != 4)
+//		printf("WTF\n");
+//	int i = 0;
+//	while (buf[i])
+//		printf("%c\n", buf[i++]);
+//	printf("recv : %s\n", buf);
+
+//	close(sock);
+//	close(agent_fd);
 
 
 

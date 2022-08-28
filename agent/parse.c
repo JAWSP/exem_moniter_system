@@ -1,4 +1,5 @@
 #include "object.h"
+#include "packets.h"
 
 /*
 TODO
@@ -9,13 +10,22 @@ TODO
 ->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
-void *pth_parse_cpu(void *cp)
+void init_packet(packet **pack)
+{
+	*pack = (packet*)malloc(sizeof(packet));
+	if (!*(pack))
+		err_by("pack malloc_error");
+}
+
+void *pth_parse_cpu(void *socks)
 {
 	char buf[BUFF_SIZE];
 	FILE *fs = NULL;
 	int i;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
+	packet *pack_c = NULL;
+	int *sock = (int*)socks;
 
 	while (1)
 	{	
@@ -27,7 +37,7 @@ void *pth_parse_cpu(void *cp)
 		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
 		if (!cpu)
 			err_by("malloc_error");
-	//	double diff_sec; ->1초를 기준으로 한다면 그다지 필요없을듯해보임
+		init_packet(&pack_c);
 
 		//측정 시작
 		gettimeofday(&startTime, NULL);
@@ -51,16 +61,25 @@ void *pth_parse_cpu(void *cp)
 		}
 		//시험
 		//아마 요부분에서 얼추 큐에 넣든 패킷에 바로넣든 결정이 될 듯싶다
-		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
-		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+		pack_c->type = 'c';
+		pack_c->date = "asd";
+		//여기서 왜 저런게 뜨는거지
+		pack_c->size = sizeof(pack_c);
+		pack_c->body = (void *)cpu;
+		printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
+	//	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+	//	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+		if (send(*sock, pack_c, pack_c->size, 0) < 0)
+			err_by("cpu packet send error");
 
 		fclose(fs);
 		free(cpu);
 		cpu = NULL;
+		free(pack_c);
+		pack_c = NULL;
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
-//		diff_sec = (endTime.tv_sec - startTime.tv_sec);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
 
 		usleep ((1000 * 1000) - diff_usec);
