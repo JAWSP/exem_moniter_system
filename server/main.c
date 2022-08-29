@@ -19,12 +19,12 @@ int accept_agent(int sock)
 
 void test(packet *a_packet)
 {	
-	cpuUsage *cpu = NULL;
+//	cpuUsage *cpu = NULL;
+	printf("test : %s\n", a_packet->type_n_date);
+//	cpu = a_packet->body;
 
-	cpu = a_packet->body;
-
-	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
-	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+//	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
+//	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
 }
 
 int main()
@@ -55,12 +55,12 @@ int main()
 
 	agent_fd = accept_agent(sock);
 
-	int num;
-	recv(agent_fd, &num, sizeof(int), 0);
-	printf("a is %d\n", num);
+//	int num;
+//	recv(agent_fd, &num, sizeof(int), 0);
+//	printf("a is %d\n", num);
 
-//	recv(agent_fd, a_packet, 1024 * 128, 0);
-//	test(a_packet);
+	while (recv(agent_fd, a_packet, 1024 * 256, 0))
+		test(a_packet);
 
 //	printf("buf : %lu\n", strlen(buf));
 //	if (strlen(buf) != 4)

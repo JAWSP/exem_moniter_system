@@ -32,6 +32,7 @@ void *pth_parse_cpu(void *socks)
 		i = 0;
 		diff_usec = 0;
 		cpuUsage *cpu;
+		char buf[42];
 		//먼저 초기화 할껀 초기화
 
 		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
@@ -59,21 +60,20 @@ void *pth_parse_cpu(void *socks)
 				cpu->iowait = indx_get_num(buf, i);
 			i = indx_go_next(buf, i);
 		}
-		//시험
-		//아마 요부분에서 얼추 큐에 넣든 패킷에 바로넣든 결정이 될 듯싶다
-		pack_c->type = 'c';
-		pack_c->date = "asd";
+		sprintf(buf, "c %d", 213);
+		strcpy(pack_c->type_n_date, buf);
+		//pack_c->type = 'c';
 		//여기서 왜 저런게 뜨는거지
-		pack_c->size = sizeof(pack_c);
-		pack_c->body = (void *)cpu;
+		pack_c->size = sizeof(packet);
+//		pack_c->body = (void *)cpu;
 	//	printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
 		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-	//	if (send(*sock, pack_c, pack_c->size, 0) < 0)
-	//		err_by("cpu packet send error");
-		int a = 3;
-		if (send(*sock, &a, sizeof(int), 0) < 0)
+		if (send(*sock, pack_c, pack_c->size, 0) < 0)
 			err_by("cpu packet send error");
+	//	int a = 3;
+	//	if (send(*sock, &a, sizeof(int), 0) < 0)
+	//		err_by("cpu packet send error");
 
 		fclose(fs);
 		free(cpu);
@@ -298,6 +298,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	buf[0] = '\0';
 	sprintf(cmd, "/proc/%d/stat", pid);
 	fs = open_fs(fs, cmd);
+	fgets(buf, BUFF_SIZE, fs);
 	for (int count = 0; count < 13; count++)
 		i = indx_go_next(buf, i);
 	if (!sscanf(&buf[i], "%d %d", &utime, &stime))

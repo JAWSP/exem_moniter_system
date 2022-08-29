@@ -42,29 +42,30 @@ typedef struct s_data
 	struct s_process *proc;
 } data;
 
+//unsigned int
 typedef struct s_cpuUsage
 {
-	int usr;
-	int sys;
-	int iowait;
-	int idle;
+	unsigned int usr;
+	unsigned int sys;
+	unsigned int iowait;
+	unsigned int idle;
 } cpuUsage;
 
 typedef struct s_memUsage
 {
-	int free;
-	int total;
-	int used;
-	int swap_total;
-	int swap_used;
+	unsigned int free;
+	unsigned int total;
+	unsigned int used;
+	unsigned int swap_total;
+	unsigned int swap_used;
 } memUsage;
 
 typedef struct s_packUsage
 {
 	char *inter;
-	int in_bytes;
-	int in_packets;
-	int out_bytes;
+	unsigned int in_bytes;
+	unsigned int in_packets;
+	unsigned int out_bytes;
 	int out_packets;
 	struct s_packUsage *next;
 } packUsage;
@@ -72,9 +73,9 @@ typedef struct s_packUsage
 typedef struct s_process
 {
 	char *name;
-	int pid;
-	int ppid;
-	int cpu_time;
+	unsigned int pid;
+	unsigned int ppid;
+	unsigned int cpu_time;
 	char *user_name;
 	char *cmd_line;
 	struct s_process *next;

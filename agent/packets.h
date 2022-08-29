@@ -23,10 +23,9 @@ typedef enum e_type
 typedef struct s_packet
 {
 	//대충 헤더
-	char type;
-	char *date;
+	char type_n_date[42];
 	int size; 
-	void *body;
+//	void *body;
 	//대충 바디
 } packet;
 
