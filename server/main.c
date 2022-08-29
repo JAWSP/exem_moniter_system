@@ -46,6 +46,8 @@ int main()
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_addr.sin_port = htons(1234);
+	if (!(a_packet = (packet *)malloc(sizeof(packet))))
+		err_by("packet malloc error");
 
 	res = bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
 	if (res < 0)
@@ -59,7 +61,7 @@ int main()
 //	recv(agent_fd, &num, sizeof(int), 0);
 //	printf("a is %d\n", num);
 
-	while (recv(agent_fd, a_packet, 1024 * 256, 0))
+	while (recv(agent_fd, a_packet, sizeof(packet), 0))
 		test(a_packet);
 
 //	printf("buf : %lu\n", strlen(buf));

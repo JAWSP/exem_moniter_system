@@ -32,7 +32,6 @@ void *pth_parse_cpu(void *socks)
 		i = 0;
 		diff_usec = 0;
 		cpuUsage *cpu;
-		char buf[42];
 		//먼저 초기화 할껀 초기화
 
 		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
@@ -60,8 +59,7 @@ void *pth_parse_cpu(void *socks)
 				cpu->iowait = indx_get_num(buf, i);
 			i = indx_go_next(buf, i);
 		}
-		sprintf(buf, "c %d", 213);
-		strcpy(pack_c->type_n_date, buf);
+		sprintf(pack_c->type_n_date, "c %d", 213);
 		//pack_c->type = 'c';
 		//여기서 왜 저런게 뜨는거지
 		pack_c->size = sizeof(packet);
