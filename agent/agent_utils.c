@@ -10,7 +10,6 @@ void pack_free(packUsage **head)
         del = tmp;
         tmp = tmp->next;
 		free(del->inter);
-		del->inter = NULL;
         free(del);
 		del = NULL;
     }

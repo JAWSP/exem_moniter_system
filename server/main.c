@@ -57,12 +57,13 @@ int main()
 
 	agent_fd = accept_agent(sock);
 
-//	int num;
-//	recv(agent_fd, &num, sizeof(int), 0);
-//	printf("a is %d\n", num);
+	//while recv 이부분 수정해야함
+	int num;
+	while (recv(agent_fd, &num, sizeof(int), 0))
+		printf("a is %d\n", num);
 
-	while (recv(agent_fd, a_packet, sizeof(packet), 0))
-		test(a_packet);
+//	while (recv(agent_fd, a_packet, sizeof(packet), 0))
+//		test(a_packet);
 
 //	printf("buf : %lu\n", strlen(buf));
 //	if (strlen(buf) != 4)

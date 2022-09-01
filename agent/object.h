@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <pwd.h>
 #include "../utils/utils.h"
+#include "packets.h"
 
 #define BUFF_SIZE 1024
 #define LOCAL_ADDR 2130706433
@@ -43,43 +44,6 @@ typedef struct s_data
 } data;
 
 //unsigned int
-typedef struct s_cpuUsage
-{
-	unsigned int usr;
-	unsigned int sys;
-	unsigned int iowait;
-	unsigned int idle;
-} cpuUsage;
-
-typedef struct s_memUsage
-{
-	unsigned int free;
-	unsigned int total;
-	unsigned int used;
-	unsigned int swap_total;
-	unsigned int swap_used;
-} memUsage;
-
-typedef struct s_packUsage
-{
-	char *inter;
-	unsigned int in_bytes;
-	unsigned int in_packets;
-	unsigned int out_bytes;
-	int out_packets;
-	struct s_packUsage *next;
-} packUsage;
-
-typedef struct s_process
-{
-	char *name;
-	unsigned int pid;
-	unsigned int ppid;
-	unsigned int cpu_time;
-	char *user_name;
-	char *cmd_line;
-	struct s_process *next;
-} procInfo;
 
 /*
  * include func

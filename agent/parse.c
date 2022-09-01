@@ -60,18 +60,17 @@ void *pth_parse_cpu(void *socks)
 			i = indx_go_next(buf, i);
 		}
 		sprintf(pack_c->type_n_date, "c %d", 213);
-		//pack_c->type = 'c';
 		//여기서 왜 저런게 뜨는거지
 		pack_c->size = sizeof(packet);
 //		pack_c->body = (void *)cpu;
 	//	printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
 		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-		if (send(*sock, pack_c, pack_c->size, 0) < 0)
+//		if (send(*sock, pack_c, pack_c->size, 0) < 0)
+//			err_by("cpu packet send error");
+		int a = 3;
+		if (send(*sock, &a, sizeof(int), 0) < 0)
 			err_by("cpu packet send error");
-	//	int a = 3;
-	//	if (send(*sock, &a, sizeof(int), 0) < 0)
-	//		err_by("cpu packet send error");
 
 		fclose(fs);
 		free(cpu);
@@ -168,7 +167,7 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	name[strlen(name) - 1] = '\0'; //해당 단어 뒤 : 문자 제거를 위함;
 	//해당 변수를 pack->inter[30]처럼 크기를 바로 할당을 할지 아니면 이후에 dup시킬지 고민함
 	//dup이 더 안정적일 것 같아서 넣음
-	pack->inter = strdup(name);
+	strcpy(pack->inter, name);
 	for (int count = 0; count < 9; count++)
 		i = indx_go_next(buf, i);
 	if (!sscanf(&buf[i], "%d %d", &pack->out_bytes, &pack->out_packets))
@@ -186,6 +185,7 @@ void *pth_parse_packet(void *pac)
 	struct timeval startTime, endTime;
 	
 	//원하고자 하는 내용은 3번째 줄에 있다
+	//구조체를 생성하는 부분은 따로 뺄까?
 	while (1)
 	{
 		i = 0;
@@ -194,7 +194,7 @@ void *pth_parse_packet(void *pac)
 		pack = (packUsage*)malloc(sizeof(packUsage));
 		if (!pack)
 			err_by("malloc_error");
-		(pack)->inter = NULL;
+		(pack)->inter[0] = '\0';
 		(pack)->next = NULL;
 
 		fs = open_fs(fs, "/proc/net/dev");
@@ -204,14 +204,14 @@ void *pth_parse_packet(void *pac)
 		{
 			if (ferror(fs))
 				err_by("net socket parse error");
-			if (pack->inter)
+			if (strlen(pack->inter))
 			{
 				packUsage *new;
 				packUsage *tmp = pack;
 				new = (packUsage*)malloc(sizeof(packUsage));
 				if (!new)
 					err_by("new pack malloc_error");
-				new->inter = NULL;
+				new->inter[0] = '\0';
 				new->next = NULL;
 				insert_packet(buf, new);
 				while (tmp->next)
@@ -226,7 +226,7 @@ void *pth_parse_packet(void *pac)
 
 
 		packUsage *tmp = pack;
-		while (tmp && tmp->inter)
+		while (tmp)
 		{
 			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n",
 					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
