@@ -106,12 +106,12 @@ void *pth_parse_cpu(void *socks)
 		fclose(fs);
 		free(cpu);
 		cpu = NULL;
+		free(head_c);
+		head_c = NULL;
 		free(pack_c->data);
 		pack_c->data = NULL;
 		free(pack_c);
 		pack_c = NULL;
-		free(head_c);
-		head_c = NULL;
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
