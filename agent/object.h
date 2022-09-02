@@ -56,7 +56,10 @@ void *pth_parse_packet(void *pac);
 void *pth_parse_process(void *pro);
 
 //agent_utils.c
+char *get_curr_time(void);
+void pack_new(packUsage **new);
 void pack_free(packUsage **head);
+void proc_new(procInfo **new);
 void proc_free(procInfo **head);
 
 # endif

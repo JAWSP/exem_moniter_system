@@ -59,10 +59,8 @@ void *pth_parse_cpu(void *socks)
 				cpu->iowait = indx_get_num(buf, i);
 			i = indx_go_next(buf, i);
 		}
-		sprintf(pack_c->type_n_date, "c %d", 213);
-		//여기서 왜 저런게 뜨는거지
+		sprintf(pack_c->type_n_date, "c %s", get_curr_time());
 		pack_c->size = sizeof(packet);
-//		pack_c->body = (void *)cpu;
 	//	printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
 		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
@@ -177,7 +175,7 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 
 void *pth_parse_packet(void *pac)
 {
-	packUsage *pack = pac;
+	packUsage *pack;
 	char buf[BUFF_SIZE];
 	int i;
 	FILE *fs = NULL;
@@ -191,11 +189,7 @@ void *pth_parse_packet(void *pac)
 		i = 0;
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
-		pack = (packUsage*)malloc(sizeof(packUsage));
-		if (!pack)
-			err_by("malloc_error");
-		(pack)->inter[0] = '\0';
-		(pack)->next = NULL;
+		pack_new(&pack);
 
 		fs = open_fs(fs, "/proc/net/dev");
 		fgets(buf, BUFF_SIZE, fs);
@@ -208,11 +202,7 @@ void *pth_parse_packet(void *pac)
 			{
 				packUsage *new;
 				packUsage *tmp = pack;
-				new = (packUsage*)malloc(sizeof(packUsage));
-				if (!new)
-					err_by("new pack malloc_error");
-				new->inter[0] = '\0';
-				new->next = NULL;
+				pack_new(&new);
 				insert_packet(buf, new);
 				while (tmp->next)
 					tmp = tmp->next;
@@ -265,7 +255,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 		{
 			if (!sscanf(buf, "%*s %s", name))
 				err_by("process name sscanf error");
-			proc->name = strdup(name);
+			strcpy(proc->name ,name);
 		}
 		else if (i == 5)
 		{
@@ -284,7 +274,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 			getpwuid_r(uid, &pwd, name, BUFF_SIZE, &result);
 			if (result == NULL)
 				err_by("getpwuid_r error");
-			proc->user_name = strdup(pwd.pw_name);
+			strcpy(proc->user_name ,pwd.pw_name);
 			break ;
 		}
 		i++;
@@ -310,9 +300,9 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	buf[0] = '\0';
 	fgets(buf, BUFF_SIZE, fs);
 	if (strlen(buf) == 0)
-		proc->cmd_line = strdup("");
+		proc->cmd_line[0] = '\0';
 	else
-		proc->cmd_line = strdup(buf);
+		strcpy(proc->cmd_line, buf);
 
 	fclose(fs);
 	return (proc);
@@ -320,7 +310,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 
 void *pth_parse_process(void *pro)
 {
-	procInfo *proc = pro;
+	procInfo *proc;
 	struct dirent *buf = NULL;
 	int pid = 0;
 	DIR *dir = NULL;
@@ -331,11 +321,7 @@ void *pth_parse_process(void *pro)
 	{
 		diff_usec = 0;
 	
-		proc = (procInfo*)malloc(sizeof(procInfo));
-		if (!proc)
-			err_by("malloc_error");	
-		proc->name = NULL;
-		proc->next = NULL;
+		proc_new(&proc);
 		gettimeofday(&startTime, NULL);
 
 		dir = open_dir(dir, "/proc");
@@ -343,18 +329,11 @@ void *pth_parse_process(void *pro)
 		{
 			if ((pid = atoi(buf->d_name)) > 0)
 			{
-				if (proc->name)
+				if (strlen(proc->name))
 				{
 					procInfo *new;
 					procInfo *tmp = proc;
-					new = (procInfo*)malloc(sizeof(procInfo));
-					if (!new)
-						err_by("new pack malloc_error");
-					new->name = NULL;
-					new->next = NULL;
-					insert_proc(pid, new);
-					while (tmp->next)
-						tmp = tmp->next;
+					proc_new(&new);
 					tmp->next = new;
 					continue ;
 				}
@@ -364,7 +343,7 @@ void *pth_parse_process(void *pro)
 		closedir(dir);
 
 		procInfo *tmp2 = proc;
-		while (tmp2 && tmp2->name)
+		while (tmp2)
 		{
 			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
 					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);

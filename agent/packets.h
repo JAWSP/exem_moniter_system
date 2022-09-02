@@ -24,7 +24,7 @@ typedef enum e_type
 typedef struct s_packet
 {
 	//대충 헤더
-	char type_n_date[42];
+	char type_n_date[22];
 	int size; 
 } packet;
 
@@ -52,18 +52,20 @@ typedef struct s_packUsage
 	unsigned int in_bytes;
 	unsigned int in_packets;
 	unsigned int out_bytes;
-	int out_packets;
+	unsigned int out_packets;
 	struct s_packUsage *next;
 } packUsage;
 
 typedef struct s_process
 {
-	char *name;
+	char name[16];
 	unsigned int pid;
 	unsigned int ppid;
 	unsigned int cpu_time;
-	char *user_name;
-	char *cmd_line;
+	char user_name[32];
+	//얜 최대가 3만바이트인데어찌 처리하지?
+	//일단 저것에 대한 최대 길이를 측정해보는게 나을듯
+	char cmd_line[1024];
 	struct s_process *next;
 } procInfo;
 
