@@ -10,11 +10,37 @@ TODO
 ->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
-void init_packet(packet **pack)
+void init_packet(packet **pack, header **head)
 {
 	*pack = (packet*)malloc(sizeof(packet));
 	if (!*(pack))
 		err_by("pack malloc_error");
+	*head = (header*)malloc(sizeof(header));
+	if (!*(head))
+		err_by("head malloc_error");
+}
+
+header *insert_header(header *head, char type)
+{
+	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
+	if (type == 'c')
+		head->count = 1;
+	else if (type == 'm')
+		head->count = 1;
+	else if (type == 'n')
+	{
+		//얼추 fgets를 이용하여 갯수를 구하면 될 것 같음
+	}
+	else if (type == 'p')
+	{
+	}
+	return (head);
+}
+
+void send_data(packet *pack, int sock)
+{
+	if (send(sock, pack->data, pack->len, 0) < 0)
+		err_by("packet send error");
 }
 
 void *pth_parse_cpu(void *socks)
@@ -25,56 +51,67 @@ void *pth_parse_cpu(void *socks)
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	packet *pack_c = NULL;
+	header *head_c = NULL;
+	cpuUsage *cpu = NULL;
 	int *sock = socks;
 
+
 	while (1)
-	{	
+	{
 		i = 0;
 		diff_usec = 0;
-		cpuUsage *cpu;
-		//먼저 초기화 할껀 초기화
-
+		//먼저 초기화 할껀 초기화	
 		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
 		if (!cpu)
 			err_by("malloc_error");
-		init_packet(&pack_c);
+		init_packet(&pack_c, &head_c);
+		head_c = insert_header(head_c, 'c');
+		pack_c->len  = sizeof(header) + sizeof(cpuUsage);
+		pack_c->data = (unsigned char *)malloc(pack_c->len);
+		cpu = (cpuUsage *)(pack_c->data + sizeof(header));
 
-		//측정 시작
+		//루프 돌면서 측정 시작			
 		gettimeofday(&startTime, NULL);
 		fs = open_fs(fs, "/proc/stat");
-
-		fgets(buf, BUFF_SIZE, fs);
-		if (ferror(fs))
-			err_by("stat parse error");
-
-		for (int count = 0; count < 6; count++)
+		for (int loop = 0; loop < head_c->count; loop++)
 		{
-			if (count == 1)
-				cpu->usr = indx_get_num(buf, i);
-			else if (count == 3)
-				cpu->sys = indx_get_num(buf, i);
-			else if (count == 4)
-				cpu->idle = indx_get_num(buf, i);
-			else if (count == 5)
-				cpu->iowait = indx_get_num(buf, i);
-			i = indx_go_next(buf, i);
-		}
-		sprintf(pack_c->type_n_date, "c %s", get_curr_time());
-		pack_c->size = sizeof(packet);
-	//	printf("type : %c, date : %s, size : %d", pack_c-> type, pack_c->date, pack_c->size);
+
+
+			fgets(buf, BUFF_SIZE, fs);
+			if (ferror(fs))
+				err_by("stat parse error");
+
+			for (int count = 0; count < 6; count++)
+			{
+				if (count == 1)
+					cpu->usr = indx_get_num(buf, i);
+				else if (count == 3)
+					cpu->sys = indx_get_num(buf, i);
+				else if (count == 4)
+					cpu->idle = indx_get_num(buf, i);
+				else if (count == 5)
+					cpu->iowait = indx_get_num(buf, i);
+				i = indx_go_next(buf, i);
+			}// collect loop;
+		}//insert loop;
+		 //
 		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-//		if (send(*sock, pack_c, pack_c->size, 0) < 0)
+
+		send_data(pack_c, *sock);
+//		int a = 3;
+//		if (send(*sock, &a, sizeof(int), 0) < 0)
 //			err_by("cpu packet send error");
-		int a = 3;
-		if (send(*sock, &a, sizeof(int), 0) < 0)
-			err_by("cpu packet send error");
 
 		fclose(fs);
 		free(cpu);
 		cpu = NULL;
+		free(pack_c->data);
+		pack_c->data = NULL;
 		free(pack_c);
 		pack_c = NULL;
+		free(head_c);
+		head_c = NULL;
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
@@ -82,6 +119,7 @@ void *pth_parse_cpu(void *socks)
 
 		usleep ((1000 * 1000) - diff_usec);
 	}//cpu while
+	free(pack_c);
 
 	return ((void*)0);
 }
