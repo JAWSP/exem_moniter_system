@@ -10,14 +10,11 @@ TODO
 ->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
 */
 
-void init_packet(packet **pack, header **head)
+void init_packet(packet **pack)
 {
 	*pack = (packet*)malloc(sizeof(packet));
 	if (!*(pack))
 		err_by("pack malloc_error");
-	*head = (header*)malloc(sizeof(header));
-	if (!*(head))
-		err_by("head malloc_error");
 }
 
 header *insert_header(header *head, char type)
@@ -51,8 +48,8 @@ void *pth_parse_cpu(void *socks)
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	packet *pack_c = NULL;
-	header *head_c = NULL;
-	cpuUsage *cpu = NULL;
+	header *head_c;
+	cpuUsage *cpu;
 	int *sock = socks;
 
 
@@ -61,11 +58,12 @@ void *pth_parse_cpu(void *socks)
 		i = 0;
 		diff_usec = 0;
 		//먼저 초기화 할껀 초기화	
-		init_packet(&pack_c, &head_c);
-		head_c = insert_header(head_c, 'c');
+		init_packet(&pack_c);
 		pack_c->len  = sizeof(header) + sizeof(cpuUsage);
 		pack_c->data = (unsigned char *)malloc(pack_c->len);
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
+		head_c = (header *)pack_c->data;
+		head_c = insert_header(head_c, 'c');
 		cpu = (cpuUsage *)(pack_c->data + sizeof(header));
 
 		//루프 돌면서 측정 시작			
@@ -97,8 +95,6 @@ void *pth_parse_cpu(void *socks)
 		send_data(pack_c, *sock);
 
 		fclose(fs);
-		free(head_c);
-		head_c = NULL;
 		free(pack_c->data);
 		pack_c->data = NULL;
 		free(pack_c);
