@@ -17,14 +17,11 @@ int accept_agent(int sock)
 	return (agent_fd);
 }
 
-void test(packet *a_packet)
-{	
-//	cpuUsage *cpu = NULL;
-	printf("test : %s\n", a_packet->type_n_date);
-//	cpu = a_packet->body;
-
-//	printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
-//	cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
+void test(char *buf)
+{
+	header *ttt;
+	ttt = (header *)buf;
+	printf("test : %s, %d\n", ttt->type_n_date, ttt->count);
 }
 
 int main()
@@ -33,8 +30,7 @@ int main()
 	int sock;
 	int res = 0;
 	int agent_fd;
-//	char buf[1024];
-	packet *a_packet = NULL;
+	char buf[1024 * 128];
 	struct sockaddr_in server_addr;
 
 	//통신 설정 초기 셋팅
@@ -46,8 +42,6 @@ int main()
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_addr.sin_port = htons(1234);
-	if (!(a_packet = (packet *)malloc(sizeof(packet))))
-		err_by("packet malloc error");
 
 	res = bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
 	if (res < 0)
@@ -58,12 +52,12 @@ int main()
 	agent_fd = accept_agent(sock);
 
 	//while recv 이부분 수정해야함
-	int num;
-	while (recv(agent_fd, &num, sizeof(int), 0))
-		printf("a is %d\n", num);
+//	int num;
+//	while (recv(agent_fd, &num, sizeof(int), 0))
+//		printf("a is %d\n", num);
 
-//	while (recv(agent_fd, a_packet, sizeof(packet), 0))
-//		test(a_packet);
+	while (recv(agent_fd, buf, 1024 *128, 0))
+		test(buf);
 
 //	printf("buf : %lu\n", strlen(buf));
 //	if (strlen(buf) != 4)

@@ -68,6 +68,7 @@ void *pth_parse_cpu(void *socks)
 		head_c = insert_header(head_c, 'c');
 		pack_c->len  = sizeof(header) + sizeof(cpuUsage);
 		pack_c->data = (unsigned char *)malloc(pack_c->len);
+		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		cpu = (cpuUsage *)(pack_c->data + sizeof(header));
 
 		//루프 돌면서 측정 시작			
@@ -380,6 +381,7 @@ void *pth_parse_process(void *pro)
 		}
 		closedir(dir);
 
+		/*
 		procInfo *tmp2 = proc;
 		while (tmp2)
 		{
@@ -387,6 +389,7 @@ void *pth_parse_process(void *pro)
 					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
 			tmp2 = tmp2->next;
 		}
+		*/
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
