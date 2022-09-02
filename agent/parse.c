@@ -61,9 +61,6 @@ void *pth_parse_cpu(void *socks)
 		i = 0;
 		diff_usec = 0;
 		//먼저 초기화 할껀 초기화	
-		cpu = (cpuUsage*)malloc(sizeof(cpuUsage));
-		if (!cpu)
-			err_by("malloc_error");
 		init_packet(&pack_c, &head_c);
 		head_c = insert_header(head_c, 'c');
 		pack_c->len  = sizeof(header) + sizeof(cpuUsage);
@@ -76,8 +73,6 @@ void *pth_parse_cpu(void *socks)
 		fs = open_fs(fs, "/proc/stat");
 		for (int loop = 0; loop < head_c->count; loop++)
 		{
-
-
 			fgets(buf, BUFF_SIZE, fs);
 			if (ferror(fs))
 				err_by("stat parse error");
@@ -100,13 +95,8 @@ void *pth_parse_cpu(void *socks)
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
 
 		send_data(pack_c, *sock);
-//		int a = 3;
-//		if (send(*sock, &a, sizeof(int), 0) < 0)
-//			err_by("cpu packet send error");
 
 		fclose(fs);
-		free(cpu);
-		cpu = NULL;
 		free(head_c);
 		head_c = NULL;
 		free(pack_c->data);
