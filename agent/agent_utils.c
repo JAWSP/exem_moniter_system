@@ -34,7 +34,6 @@ void pack_free(packUsage **head)
     {
         del = tmp;
         tmp = tmp->next;
-		free(del->inter);
         free(del);
 		del = NULL;
     }
@@ -58,10 +57,6 @@ void proc_free(procInfo **head)
     {
         del = tmp;
         tmp = tmp->next;
-		//인자들 free
-		free(del->name);
-		free(del->user_name);
-		free(del->cmd_line);
         free(del);
 		del = NULL;
     }
