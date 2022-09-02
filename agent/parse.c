@@ -40,27 +40,28 @@ void send_data(packet *pack, int sock)
 		err_by("packet send error");
 }
 
-void *pth_parse_cpu(void *socks)
+void *pth_parse_cpu(void *socket)
 {
 	char buf[BUFF_SIZE];
 	FILE *fs = NULL;
 	int i;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
-	packet *pack_c = NULL;
 	header *head_c;
 	cpuUsage *cpu;
-	int *sock = socks;
+	int *sock = socket;
 
 
 	while (1)
 	{
-		i = 0;
+		packet *pack_c;
 		diff_usec = 0;
-		//먼저 초기화 할껀 초기화	
+		//먼저 초기화 할껀 초기화
+		//+1하는 이유는 맨 마지막 null값 넣을려고
 		init_packet(&pack_c);
-		pack_c->len  = sizeof(header) + sizeof(cpuUsage);
+		pack_c->len  = sizeof(header) + sizeof(cpuUsage) + 1;
 		pack_c->data = (unsigned char *)malloc(pack_c->len);
+		pack_c->data[pack_c->len] = 0;
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		head_c = (header *)pack_c->data;
 		head_c = insert_header(head_c, 'c');
@@ -74,7 +75,7 @@ void *pth_parse_cpu(void *socks)
 			fgets(buf, BUFF_SIZE, fs);
 			if (ferror(fs))
 				err_by("stat parse error");
-
+			i = 0;
 			for (int count = 0; count < 6; count++)
 			{
 				if (count == 1)
@@ -88,10 +89,11 @@ void *pth_parse_cpu(void *socks)
 				i = indx_go_next(buf, i);
 			}// collect loop;
 		}//insert loop;
-		 //
 		printf("usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		cpu->usr, cpu->sys, cpu->idle, cpu->iowait);
-
+		/*
+		 * sending time
+		 */
 		send_data(pack_c, *sock);
 
 		fclose(fs);
@@ -106,70 +108,86 @@ void *pth_parse_cpu(void *socks)
 
 		usleep ((1000 * 1000) - diff_usec);
 	}//cpu while
-	free(pack_c);
 
 	return ((void*)0);
 }
 
-void *pth_parse_mem(void *me)
+void *pth_parse_mem(void *socket)
 {
-	memUsage *mem = me;
+	memUsage *mem;
+	header *head_c;
 	char buf[BUFF_SIZE];
 	int i;
 	FILE *fs = NULL;
 	double diff_usec = 0;
+	int *sock = (int *)socket;
 	struct timeval startTime, endTime;
 	
 	while (1)
 	{
-		i = 0;
+		packet *pack_c;
+		init_packet(&pack_c);
+		pack_c->len  = sizeof(header) + sizeof(memUsage) + 1;
+		pack_c->data = (unsigned char *)malloc(pack_c->len);
+		pack_c->data[pack_c->len] = 0;
+		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
+		head_c = (header *)pack_c->data;
+		head_c = insert_header(head_c, 'm');
+		mem = (memUsage *)(pack_c->data + sizeof(header));
+
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
-		mem = (memUsage*)malloc(sizeof(memUsage));
+		i = 0;
 		if (!mem)
 			err_by("malloc_error");
 
 		fs = open_fs(fs, "/proc/meminfo");
-		while (fgets(buf, BUFF_SIZE, fs))
+		for (int loop = 0; loop < head_c->count; loop++)
 		{
-			if (i == 0)
+			while (fgets(buf, BUFF_SIZE, fs))
 			{
-				if (!sscanf(buf, "%*s %d", &mem->total))
-					err_by("total mem  sscanf error");
-			}
-			else if (i == 1)
-			{
-				if (!sscanf(buf, "%*s %d", &mem->free))
-					err_by("free mem sscanf error");
-				mem->used = mem->total - mem->free;
-			}
-			else if (i == 14)
-			{
-				if (!sscanf(buf, "%*s %d", &mem->swap_total))
-					err_by("swap total mem sscanf error");
-			}
-			else if (i == 15)
-			{
-				int tmp;
-				if (!sscanf(buf, "%*s %d", &tmp))
-					err_by("swap free sscanf error");
-				mem->swap_used = mem->swap_total - tmp;
-			}
-			else if (i >= 16)
-				break ;
-			i++;
-		}// mem parse roop	
+				if (i == 0)
+				{
+					if (!sscanf(buf, "%*s %d", &mem->total))
+						err_by("total mem  sscanf error");
+				}
+				else if (i == 1)
+				{
+					if (!sscanf(buf, "%*s %d", &mem->free))
+						err_by("free mem sscanf error");
+					mem->used = mem->total - mem->free;
+				}
+				else if (i == 14)
+				{
+					if (!sscanf(buf, "%*s %d", &mem->swap_total))
+						err_by("swap total mem sscanf error");
+				}
+				else if (i == 15)
+				{
+					int tmp;
+					if (!sscanf(buf, "%*s %d", &tmp))
+						err_by("swap free sscanf error");
+					mem->swap_used = mem->swap_total - tmp;
+				}
+				else if (i >= 16)
+					break ;
+				i++;
+			}// mem parse loop
+			if (ferror(fs))
+				err_by("mem parse error");
+		}//mem insert loop
 		
-		if (ferror(fs))
-			err_by("mem parse error");
+
 
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
+		send_data(pack_c, *sock);
 		
 		fclose(fs);
-		free(mem);
-		mem = NULL;
-
+		free(pack_c->data);
+		pack_c->data = NULL;
+		free(pack_c);
+		pack_c = NULL;
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -198,7 +216,7 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	return (pack);
 }
 
-void *pth_parse_packet(void *pac)
+void *pth_parse_packet(void *socket)
 {
 	packUsage *pack;
 	char buf[BUFF_SIZE];
@@ -333,7 +351,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	return (proc);
 }
 
-void *pth_parse_process(void *pro)
+void *pth_parse_process(void *socket)
 {
 	procInfo *proc;
 	struct dirent *buf = NULL;

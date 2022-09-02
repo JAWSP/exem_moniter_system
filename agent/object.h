@@ -37,10 +37,7 @@ typedef struct s_lobal
 
 typedef struct s_data
 {
-	struct s_cpuUsage *cpu;
-	struct s_memUsage *mem;
-	struct s_packUsage *pack;
-	struct s_process *proc;
+
 } data;
 
 //unsigned int
@@ -50,10 +47,11 @@ typedef struct s_data
  */
 
 //parse.c
-void *pth_parse_cpu(void *cp);
-void *pth_parse_mem(void *me);
-void *pth_parse_packet(void *pac);
-void *pth_parse_process(void *pro);
+
+void *pth_parse_cpu(void *socket);
+void *pth_parse_mem(void *socket);
+void *pth_parse_packet(void *socket);
+void *pth_parse_process(void *socket);
 
 //agent_utils.c
 char *get_curr_time(void);
