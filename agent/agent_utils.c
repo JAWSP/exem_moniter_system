@@ -41,7 +41,11 @@ packet *init_packet(packet *pack, char type, int count)
 		pack->data[pack->len - 1] = 0;
 	}
 	else if (type == 'p')
-	{}
+	{
+		pack->len  = sizeof(header) + (sizeof(procInfo) * count) + 1;
+		pack->data = (unsigned char *)malloc(pack->len);
+		pack->data[pack->len - 1] = 0;
+	}
 	return (pack);
 }
 
@@ -70,28 +74,18 @@ int get_count(char type, char *cmd)
 		res -= 2;
 		fclose(fs);
 	}
+	else if (type == 'p')
+	{
+		DIR *dir = NULL;
+		struct dirent *buf = NULL;
+
+		dir = open_dir(dir, "/proc");
+		while ((buf = readdir(dir)) != NULL)
+		{
+			if (atoi(buf->d_name) > 0)
+				res++;
+		}
+		closedir(dir);
+	}
 	return (res);
-}
-
-void proc_new(procInfo **new)
-{
-	*new = (procInfo*)malloc(sizeof(procInfo));
-	if (!(*new))
-		err_by("new pack malloc_error");
-	(*new)->name[0] = '\0';
-	(*new)->next = NULL;
-}
-
-void proc_free(procInfo **head)
-{
-    procInfo *del = NULL;
-    procInfo *tmp = *head;
-    while (tmp)
-    {
-        del = tmp;
-        tmp = tmp->next;
-        free(del);
-		del = NULL;
-    }
-	*head = NULL;
 }

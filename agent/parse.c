@@ -200,7 +200,7 @@ void *pth_parse_packet(void *socket)
 		header *head;
 		int count = 0;
 		count = get_count('n', "/proc/net/dev");
-		init_packet(packet, 'n', count);
+		packet = init_packet(packet, 'n', count);
 		
 		head = (header *)packet->data;
 		head = insert_header(head, 'n');
@@ -224,7 +224,6 @@ void *pth_parse_packet(void *socket)
 			}
 		}
 		
-		fclose(fs);
 		unsigned char *bb = packet->data;
 		packUsage *tmp = (packUsage *)(bb + sizeof(header));
 		for (int loop = 0; loop < count; loop++)
@@ -234,6 +233,12 @@ void *pth_parse_packet(void *socket)
 			tmp++;
 		}
 		send_data(packet, *sock);
+		
+		fclose(fs);
+		free(packet->data);
+		packet->data = NULL;
+		free(packet);
+		packet = NULL;
 		//이거 이따가 좀 초기화 시켜야 할듯
 		
 		gettimeofday(&endTime, NULL);
@@ -321,6 +326,7 @@ procInfo *insert_proc(int pid, procInfo *proc)
 void *pth_parse_process(void *socket)
 {
 	procInfo *proc;
+	int *sock = socket;
 	struct dirent *buf = NULL;
 	int pid = 0;
 	DIR *dir = NULL;
@@ -329,46 +335,50 @@ void *pth_parse_process(void *socket)
 
 	while (1)
 	{
-		diff_usec = 0;
-	
-		proc_new(&proc);
+		packet *packet;
+		header *head;
+		int count = 0;
+		count = get_count('p', "/proc");
+		packet = init_packet(packet, 'p', count);
+		
+		head = (header *)packet->data;
+		head = insert_header(head, 'n');
+		head->count = count;
+		proc = (procInfo *)(packet->data + sizeof(header));
+		
+		diff_usec = 0;	
 		gettimeofday(&startTime, NULL);
 
 		dir = open_dir(dir, "/proc");
 		while ((buf = readdir(dir)) != NULL)
 		{
 			if ((pid = atoi(buf->d_name)) > 0)
-			{
-				if (strlen(proc->name))
-				{
-					procInfo *new;
-					procInfo *tmp = proc;
-					proc_new(&new);
-					tmp->next = new;
-					continue ;
-				}
 				insert_proc(pid, proc);
-			}
-			//else
-			//	대충 카운트 하나씩 깎는 함수
+			proc++;
 		}
-		closedir(dir);
 
 		/*
-		procInfo *tmp2 = proc;
-		while (tmp2)
+		unsigned char *bb = packet->data;
+		packUsage *tmp = (porcInfo *)(bb + sizeof(header));
+		for (int loop = 0; loop < count; loop++)
 		{
 			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
 					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
-			tmp2 = tmp2->next;
+			tmp2++;
 		}
 		*/
+		send_data(packet, *sock);
+		
+		closedir(dir);
+		free(packet->data);
+		packet->data = NULL;
+		free(packet);
+		packet = NULL;
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
 		usleep ((1000 * 1000) - diff_usec);	
 
-		proc_free(&proc);
 	}//proc roop
 	return ((void*)0);
 }

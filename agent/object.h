@@ -34,7 +34,7 @@ typedef struct s_lobal
 	int tmp;
 } g_lobal;
 */
-
+//아마 여기서 전역변수를 쓸 것 같은 느낌이 드는데
 typedef struct s_data
 {
 
@@ -58,7 +58,5 @@ char *get_curr_time(void);
 int get_count(char type, char *cmd);
 packet *init_packet(packet *pack, char type, int count);
 header *insert_header(header *head, char type);
-void proc_new(procInfo **new);
-void proc_free(procInfo **head);
 
 # endif
