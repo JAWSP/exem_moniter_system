@@ -55,8 +55,9 @@ void *pth_parse_process(void *socket);
 
 //agent_utils.c
 char *get_curr_time(void);
-void pack_new(packUsage **new);
-void pack_free(packUsage **head);
+int get_count(char type, char *cmd);
+packet *init_packet(packet *pack, char type, int count);
+header *insert_header(header *head, char type);
 void proc_new(procInfo **new);
 void proc_free(procInfo **head);
 

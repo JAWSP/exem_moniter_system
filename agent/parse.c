@@ -1,39 +1,6 @@
 #include "object.h"
 #include "packets.h"
 
-/*
-TODO
-해당 스레드를 죽이지 않고 지속적으로 살려야 한다
-싱크 -> 걸린시간의 차를 이용하여 특정 시간대에 맞게 설정해야 하고
-그러면서 한번 수집이 끝났으면 각각 패킷에 넣으면 됨
-근데 접속이 끊겨도 그대로 전달해주기 위한 큐(혹은 연결리스트)가 필요하게됨
-->이말인 즉슨 바로 연결이 된다면 1초간격으로 넣은 얘들을 죄다 집어 넣게 만들게 되는건가보네
-*/
-
-void init_packet(packet **pack)
-{
-	*pack = (packet*)malloc(sizeof(packet));
-	if (!*(pack))
-		err_by("pack malloc_error");
-}
-
-header *insert_header(header *head, char type)
-{
-	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
-	if (type == 'c')
-		head->count = 1;
-	else if (type == 'm')
-		head->count = 1;
-	else if (type == 'n')
-	{
-		//얼추 fgets를 이용하여 갯수를 구하면 될 것 같음
-	}
-	else if (type == 'p')
-	{
-	}
-	return (head);
-}
-
 void send_data(packet *pack, int sock)
 {
 	if (send(sock, pack->data, pack->len, 0) < 0)
@@ -47,30 +14,28 @@ void *pth_parse_cpu(void *socket)
 	int i;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
-	header *head_c;
 	cpuUsage *cpu;
 	int *sock = socket;
 
 
 	while (1)
 	{
-		packet *pack_c;
+		packet *packet;
+		header *head;
+
 		diff_usec = 0;
 		//먼저 초기화 할껀 초기화
 		//+1하는 이유는 맨 마지막 null값 넣을려고
-		init_packet(&pack_c);
-		pack_c->len  = sizeof(header) + sizeof(cpuUsage) + 1;
-		pack_c->data = (unsigned char *)malloc(pack_c->len);
-		pack_c->data[pack_c->len] = 0;
+		packet = init_packet(packet, 'c', 1);
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
-		head_c = (header *)pack_c->data;
-		head_c = insert_header(head_c, 'c');
-		cpu = (cpuUsage *)(pack_c->data + sizeof(header));
+		head = (header *)packet->data;
+		head = insert_header(head, 'c');
+		cpu = (cpuUsage *)(packet->data + sizeof(header));
 
 		//루프 돌면서 측정 시작			
 		gettimeofday(&startTime, NULL);
 		fs = open_fs(fs, "/proc/stat");
-		for (int loop = 0; loop < head_c->count; loop++)
+		for (int loop = 0; loop < head->count; loop++)
 		{
 			fgets(buf, BUFF_SIZE, fs);
 			if (ferror(fs))
@@ -94,13 +59,13 @@ void *pth_parse_cpu(void *socket)
 		/*
 		 * sending time
 		 */
-		send_data(pack_c, *sock);
+		send_data(packet, *sock);
 
 		fclose(fs);
-		free(pack_c->data);
-		pack_c->data = NULL;
-		free(pack_c);
-		pack_c = NULL;
+		free(packet->data);
+		packet->data = NULL;
+		free(packet);
+		packet = NULL;
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
@@ -115,35 +80,33 @@ void *pth_parse_cpu(void *socket)
 void *pth_parse_mem(void *socket)
 {
 	memUsage *mem;
-	header *head_c;
+	int *sock = (int *)socket;
 	char buf[BUFF_SIZE];
 	int i;
 	FILE *fs = NULL;
 	double diff_usec = 0;
-	int *sock = (int *)socket;
 	struct timeval startTime, endTime;
 	
 	while (1)
 	{
-		packet *pack_c;
-		init_packet(&pack_c);
-		pack_c->len  = sizeof(header) + sizeof(memUsage) + 1;
-		pack_c->data = (unsigned char *)malloc(pack_c->len);
-		pack_c->data[pack_c->len] = 0;
+		packet *packet;
+		header *head;
+
+		packet = init_packet(packet, 'm', 1);
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
-		head_c = (header *)pack_c->data;
-		head_c = insert_header(head_c, 'm');
-		mem = (memUsage *)(pack_c->data + sizeof(header));
+		head = (header *)packet->data;
+		head = insert_header(head, 'm');
+		mem = (memUsage *)(packet->data + sizeof(header));
 
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
-		i = 0;
 		if (!mem)
 			err_by("malloc_error");
 
 		fs = open_fs(fs, "/proc/meminfo");
-		for (int loop = 0; loop < head_c->count; loop++)
+		for (int loop = 0; loop < head->count; loop++)
 		{
+			i = 0;
 			while (fgets(buf, BUFF_SIZE, fs))
 			{
 				if (i == 0)
@@ -181,13 +144,13 @@ void *pth_parse_mem(void *socket)
 
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
-		send_data(pack_c, *sock);
+		send_data(packet, *sock);
 		
 		fclose(fs);
-		free(pack_c->data);
-		pack_c->data = NULL;
-		free(pack_c);
-		pack_c = NULL;
+		free(packet->data);
+		packet->data = NULL;
+		free(packet);
+		packet = NULL;
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -218,57 +181,61 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 
 void *pth_parse_packet(void *socket)
 {
-	packUsage *pack;
+	packUsage *np;
+	int *sock = (int *)socket;
 	char buf[BUFF_SIZE];
-	int i;
 	FILE *fs = NULL;
-	double diff_usec = 0;
+	double diff_usec;
 	struct timeval startTime, endTime;
 	
 	//원하고자 하는 내용은 3번째 줄에 있다
 	//구조체를 생성하는 부분은 따로 뺄까?
+	//TODO
+	//패킷의 길이를 할당하기 위해선 저 패킷이 몇개나 있는지 봐야하고
+	//연결리스트가 아닌 연속적으로 버퍼에 저장시켜야 함
+	//
 	while (1)
 	{
-		i = 0;
+		packet *packet;
+		header *head;
+		int count = 0;
+		count = get_count('n', "/proc/net/dev");
+		init_packet(packet, 'n', count);
+		
+		head = (header *)packet->data;
+		head = insert_header(head, 'n');
+		head->count = count;
+		np = (packUsage *)(packet->data + sizeof(header));
+
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
-		pack_new(&pack);
 
 		fs = open_fs(fs, "/proc/net/dev");
 		fgets(buf, BUFF_SIZE, fs);
 		fgets(buf, BUFF_SIZE, fs);
-		while (fgets(buf, BUFF_SIZE, fs) != 0)
+		for (int loop = 0; loop < count; loop++)
 		{
-			if (ferror(fs))
-				err_by("net socket parse error");
-			if (strlen(pack->inter))
+			while (fgets(buf, BUFF_SIZE, fs) != 0)
 			{
-				packUsage *new;
-				packUsage *tmp = pack;
-				pack_new(&new);
-				insert_packet(buf, new);
-				while (tmp->next)
-					tmp = tmp->next;
-				tmp->next = new;
+				if (ferror(fs))
+					err_by("net socket parse error");
+				insert_packet(buf, np);
+				np++;
 			}
-			else
-				insert_packet(buf, pack);
 		}
 		
 		fclose(fs);
-
-
-		packUsage *tmp = pack;
-		while (tmp)
+		unsigned char *bb = packet->data;
+		packUsage *tmp = (packUsage *)(bb + sizeof(header));
+		for (int loop = 0; loop < count; loop++)
 		{
 			printf("interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n",
 					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
-			tmp = tmp->next;
+			tmp++;
 		}
+		send_data(packet, *sock);
 		//이거 이따가 좀 초기화 시켜야 할듯
 		
-		pack_free(&pack);
-
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
 		usleep ((1000 * 1000) - diff_usec);	
@@ -382,6 +349,8 @@ void *pth_parse_process(void *socket)
 				}
 				insert_proc(pid, proc);
 			}
+			//else
+			//	대충 카운트 하나씩 깎는 함수
 		}
 		closedir(dir);
 

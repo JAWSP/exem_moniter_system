@@ -65,7 +65,7 @@ typedef struct s_packUsage
 	unsigned int in_packets;
 	unsigned int out_bytes;
 	unsigned int out_packets;
-	struct s_packUsage *next;
+//	struct s_packUsage *next;
 } packUsage;
 
 /*

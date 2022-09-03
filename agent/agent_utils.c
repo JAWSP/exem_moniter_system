@@ -17,27 +17,60 @@ char *get_curr_time(void)
 	return (res);
 }
 
-void pack_new(packUsage **new)
+packet *init_packet(packet *pack, char type, int count)
 {
-	*new = (packUsage*)malloc(sizeof(packUsage));
-	if (!(*new))
-		err_by("new pack malloc_error");
-	(*new)->inter[0] = '\0';
-	(*new)->next = NULL;
+	pack = (packet*)malloc(sizeof(packet));
+	if (!pack)
+		err_by("pack malloc_error");
+	if (type == 'c')
+	{
+		pack->len  = sizeof(header) + sizeof(cpuUsage) + 1;
+		pack->data = (unsigned char *)malloc(pack->len);
+		pack->data[pack->len - 1] = 0;
+	}
+	else if (type == 'm')
+	{
+		pack->len  = sizeof(header) + sizeof(memUsage) + 1;
+		pack->data = (unsigned char *)malloc(pack->len);
+		pack->data[pack->len - 1] = 0;
+	}
+	else if (type == 'n')
+	{
+		pack->len  = sizeof(header) + (sizeof(packUsage) * count) + 1;
+		pack->data = (unsigned char *)malloc(pack->len);
+		pack->data[pack->len - 1] = 0;
+	}
+	else if (type == 'p')
+	{}
+	return (pack);
 }
 
-void pack_free(packUsage **head)
+header *insert_header(header *head, char type)
 {
-    packUsage *del = NULL;
-    packUsage *tmp = *head;
-    while (tmp)
-    {
-        del = tmp;
-        tmp = tmp->next;
-        free(del);
-		del = NULL;
-    }
-	*head = NULL;
+	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
+	if (type == 'c')
+		head->count = 1;
+	else if (type == 'm')
+		head->count = 1;
+	return (head);
+}
+
+int get_count(char type, char *cmd)
+{
+	int res = 0;
+
+	if (type == 'n')
+	{
+		FILE *fs = NULL;
+		char buf[BUFF_SIZE];
+
+		fs = open_fs(fs, cmd);
+		while (fgets(buf, BUFF_SIZE, fs) != 0)
+			res++;
+		res -= 2;
+		fclose(fs);
+	}
+	return (res);
 }
 
 void proc_new(procInfo **new)
