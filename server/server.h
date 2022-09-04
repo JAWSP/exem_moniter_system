@@ -11,4 +11,9 @@
 #include <netdb.h>
 #include "../utils/utils.h"
 
+typedef struct s_agentInfo
+{
+	int id;
+}agentInfo;
+
 #endif

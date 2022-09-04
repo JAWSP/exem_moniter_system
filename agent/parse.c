@@ -1,12 +1,5 @@
 #include "object.h"
 #include "packets.h"
-/*
-void send_data(packet *pack, int sock)
-{
-	if (send(sock, pack->data, pack->len, 0) < 0)
-		err_by("packet send error");
-}
-*/
 
 void *pth_parse_cpu(void *pq)
 {
@@ -62,12 +55,6 @@ void *pth_parse_cpu(void *pq)
 		q = enqueue(q, packet);
 
 		fclose(fs);
-		/*
-		free(packet->data);
-		packet->data = NULL;
-		free(packet);
-		packet = NULL;
-		*/
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
@@ -149,12 +136,6 @@ void *pth_parse_mem(void *pq)
 		q = enqueue(q, packet);
 		
 		fclose(fs);
-		/*
-		free(packet->data);
-		packet->data = NULL;
-		free(packet);
-		packet = NULL;
-		*/
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -239,12 +220,6 @@ void *pth_parse_packet(void *pq)
 		q = enqueue(q, packet);
 		
 		fclose(fs);
-		/*
-		free(packet->data);
-		packet->data = NULL;
-		free(packet);
-		packet = NULL;
-		*/
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -347,7 +322,7 @@ void *pth_parse_process(void *pq)
 		packet = init_packet(packet, 'p', count);
 		
 		head = (header *)packet->data;
-		head = insert_header(head, 'n');
+		head = insert_header(head, 'p');
 		head->count = count;
 		proc = (procInfo *)(packet->data + sizeof(header));
 		
@@ -378,12 +353,6 @@ void *pth_parse_process(void *pq)
 		//send_data(packet, *sock);
 		
 		closedir(dir);
-		/*
-		free(packet->data);
-		packet->data = NULL;
-		free(packet);
-		packet = NULL;
-		*/
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;

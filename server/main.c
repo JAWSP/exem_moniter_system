@@ -52,23 +52,15 @@ int main()
 	agent_fd = accept_agent(sock);
 
 	//while recv 이부분 수정해야함
-//	int num;
-//	while (recv(agent_fd, &num, sizeof(int), 0))
-//		printf("a is %d\n", num);
+	while (1)
+	{
+		while (recv(agent_fd, buf, 1024 *128, 0))
+			test(buf);
+	}
 
-	while (recv(agent_fd, buf, 1024 *128, 0))
-		test(buf);
 
-//	printf("buf : %lu\n", strlen(buf));
-//	if (strlen(buf) != 4)
-//		printf("WTF\n");
-//	int i = 0;
-//	while (buf[i])
-//		printf("%c\n", buf[i++]);
-//	printf("recv : %s\n", buf);
-
-//	close(sock);
-//	close(agent_fd);
+	close(sock);
+	close(agent_fd);
 
 
 
