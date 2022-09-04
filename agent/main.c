@@ -28,11 +28,11 @@ int main(void)
 	if (connect(q->socket, (struct sockaddr*)&agent_addr, sizeof(agent_addr)) == -1)
 		err_by("agent connect error");
 
-	pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)&q);
-	pthread_create(&pid_m, NULL, pth_parse_mem, (void *)&q);
-	pthread_create(&pid_n, NULL, pth_parse_packet, (void *)&q);
-	pthread_create(&pid_p, NULL, pth_parse_process, (void *)&q);
-	pthread_create(&pid_q, NULL, pth_queue_process, (void *)&q);
+	pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)q);
+	pthread_create(&pid_m, NULL, pth_parse_mem, (void *)q);
+	pthread_create(&pid_n, NULL, pth_parse_packet, (void *)q);
+	pthread_create(&pid_p, NULL, pth_parse_process, (void *)q);
+	pthread_create(&pid_q, NULL, pth_queue_process, (void *)q);
 
 	//join을 살린 이유
 	//이걸 안쓰면 main에서 먼저 끝내게 됨

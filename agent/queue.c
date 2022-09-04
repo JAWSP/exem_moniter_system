@@ -70,6 +70,7 @@ void send_data(queue *q, int sock)
 	{
 		printf("it's not access yet\n");
 		usleep(920);
+		pthread_mutex_lock(&q->q_lock);
 		return ;
 		err_by("packet send error");
 	}
