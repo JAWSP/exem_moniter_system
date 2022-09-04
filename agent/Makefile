@@ -1,6 +1,6 @@
 NAME = monitor
 MAIN = main.c
-SRCS = ../utils/utils.c ../utils/index_utils.c parse.c agent_utils.c
+SRCS = ../utils/utils.c ../utils/index_utils.c parse.c agent_utils.c queue.c
 MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}

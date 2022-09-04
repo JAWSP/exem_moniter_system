@@ -14,11 +14,12 @@
 #include <pwd.h>
 #include "../utils/utils.h"
 #include "packets.h"
+#include "queue.h"
 
 #define BUFF_SIZE 1024
 #define LOCAL_ADDR 2130706433
 
-
+typedef struct s_header header;
 /*
  * structs
  * 각각의 수집한 정보를 구조체 형식으로 저장
@@ -48,10 +49,11 @@ typedef struct s_data
 
 //parse.c
 
-void *pth_parse_cpu(void *socket);
-void *pth_parse_mem(void *socket);
-void *pth_parse_packet(void *socket);
-void *pth_parse_process(void *socket);
+void *pth_parse_cpu(void *pq);
+void *pth_parse_mem(void *pq);
+void *pth_parse_packet(void *pq);
+void *pth_parse_process(void *pq);
+void *pth_queue_process(void *pq);
 
 //agent_utils.c
 char *get_curr_time(void);

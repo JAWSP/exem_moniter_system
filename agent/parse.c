@@ -1,13 +1,14 @@
 #include "object.h"
 #include "packets.h"
-
+/*
 void send_data(packet *pack, int sock)
 {
 	if (send(sock, pack->data, pack->len, 0) < 0)
 		err_by("packet send error");
 }
+*/
 
-void *pth_parse_cpu(void *socket)
+void *pth_parse_cpu(void *pq)
 {
 	char buf[BUFF_SIZE];
 	FILE *fs = NULL;
@@ -15,8 +16,7 @@ void *pth_parse_cpu(void *socket)
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
 	cpuUsage *cpu;
-	int *sock = socket;
-
+	queue *q = pq;
 
 	while (1)
 	{
@@ -59,13 +59,15 @@ void *pth_parse_cpu(void *socket)
 		/*
 		 * sending time
 		 */
-		send_data(packet, *sock);
+		q = enqueue(q, packet);
 
 		fclose(fs);
+		/*
 		free(packet->data);
 		packet->data = NULL;
 		free(packet);
 		packet = NULL;
+		*/
 
 		//측정 끝
 		gettimeofday(&endTime, NULL);
@@ -77,15 +79,15 @@ void *pth_parse_cpu(void *socket)
 	return ((void*)0);
 }
 
-void *pth_parse_mem(void *socket)
+void *pth_parse_mem(void *pq)
 {
 	memUsage *mem;
-	int *sock = (int *)socket;
 	char buf[BUFF_SIZE];
 	int i;
 	FILE *fs = NULL;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
+	queue *q = pq;
 	
 	while (1)
 	{
@@ -144,13 +146,15 @@ void *pth_parse_mem(void *socket)
 
 		printf("total = %d, used = %d, free = %d, swap_toal = %d, swap_used = %d\n",
 				mem->total, mem->used, mem->free, mem->swap_total, mem->swap_used);
-		send_data(packet, *sock);
+		q = enqueue(q, packet);
 		
 		fclose(fs);
+		/*
 		free(packet->data);
 		packet->data = NULL;
 		free(packet);
 		packet = NULL;
+		*/
 
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -179,14 +183,14 @@ packUsage *insert_packet(char *buf, packUsage *pack)
 	return (pack);
 }
 
-void *pth_parse_packet(void *socket)
+void *pth_parse_packet(void *pq)
 {
 	packUsage *np;
-	int *sock = (int *)socket;
 	char buf[BUFF_SIZE];
 	FILE *fs = NULL;
 	double diff_usec;
 	struct timeval startTime, endTime;
+	queue *q = pq;
 	
 	//원하고자 하는 내용은 3번째 줄에 있다
 	//구조체를 생성하는 부분은 따로 뺄까?
@@ -232,14 +236,15 @@ void *pth_parse_packet(void *socket)
 					tmp->inter, tmp->in_bytes, tmp->in_packets, tmp->out_bytes, tmp->out_packets);
 			tmp++;
 		}
-		send_data(packet, *sock);
+		q = enqueue(q, packet);
 		
 		fclose(fs);
+		/*
 		free(packet->data);
 		packet->data = NULL;
 		free(packet);
 		packet = NULL;
-		//이거 이따가 좀 초기화 시켜야 할듯
+		*/
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
@@ -323,15 +328,15 @@ procInfo *insert_proc(int pid, procInfo *proc)
 	return (proc);
 }
 
-void *pth_parse_process(void *socket)
+void *pth_parse_process(void *pq)
 {
 	procInfo *proc;
-	int *sock = socket;
 	struct dirent *buf = NULL;
 	int pid = 0;
 	DIR *dir = NULL;
 	double diff_usec = 0;
 	struct timeval startTime, endTime;
+	queue *q = pq;
 
 	while (1)
 	{
@@ -353,8 +358,10 @@ void *pth_parse_process(void *socket)
 		while ((buf = readdir(dir)) != NULL)
 		{
 			if ((pid = atoi(buf->d_name)) > 0)
+			{
 				insert_proc(pid, proc);
-			proc++;
+				proc++;
+			}
 		}
 
 		/*
@@ -367,13 +374,16 @@ void *pth_parse_process(void *socket)
 			tmp2++;
 		}
 		*/
-		send_data(packet, *sock);
+		q = enqueue(q, packet);
+		//send_data(packet, *sock);
 		
 		closedir(dir);
+		/*
 		free(packet->data);
 		packet->data = NULL;
 		free(packet);
 		packet = NULL;
+		*/
 		
 		gettimeofday(&endTime, NULL);
     	diff_usec = (endTime.tv_usec - startTime.tv_usec) / (double)1000000;
