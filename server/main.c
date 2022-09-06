@@ -57,13 +57,15 @@ int main()
 	{
 		agent_fd[i] = accept_agent(sock, &i);
 		//TODO recv가 중간에 문제 생기면 팅구고 다시 recv하게
-		if (recv(agent_fd[1], buf, 1024 *128, 0) > 0)
+		if (recv(agent_fd[i], buf, 1024 *128, 0) > 0)
 			test(buf);
+		else
+			break ;
 	}
 
 
 	close(sock);
-	close(agent_fd[1]);
+	close(agent_fd[i]);
 
 	return (0);
 }
