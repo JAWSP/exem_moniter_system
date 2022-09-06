@@ -2,7 +2,7 @@
 #include "../agent/object.h"
 #include "../agent/packets.h"
 
-int accept_agent(int sock)
+int accept_agent(int sock, int *i)
 {
 	struct sockaddr_in agent_addr;
 	socklen_t as;
@@ -29,7 +29,7 @@ int main()
 
 	int sock;
 	int res = 0;
-	int agent_fd;
+	int agent_fd[13] = {0, };// 여러개의
 	char buf[1024 * 128];
 	struct sockaddr_in server_addr;
 
@@ -47,22 +47,23 @@ int main()
 	if (res < 0)
 		err_by("server bind error");
 
-	listen(sock, 5);
+	listen(sock, 13);
 
-	agent_fd = accept_agent(sock);
+	//TODO 여기서 연결 끊기고 다시 연결되어도 계속 되어야 한다
 
 	//while recv 이부분 수정해야함
+	int i = 0;
 	while (1)
 	{
-		while (recv(agent_fd, buf, 1024 *128, 0))
+		agent_fd[i] = accept_agent(sock, &i);
+		//TODO recv가 중간에 문제 생기면 팅구고 다시 recv하게
+		if (recv(agent_fd[1], buf, 1024 *128, 0) > 0)
 			test(buf);
 	}
 
 
 	close(sock);
-	close(agent_fd);
-
-
+	close(agent_fd[1]);
 
 	return (0);
 }
