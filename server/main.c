@@ -35,11 +35,11 @@ int main()
 
 	//통신 설정 초기 셋팅
 	int optval = 1;
-
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	sock = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock < 0)
 		err_by("server sock error");
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		err_by("server socket set failed");
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -54,7 +54,6 @@ int main()
 
 	//TODO 여기서 연결 끊기고 다시 연결되어도 계속 되어야 한다
 
-	//while recv 이부분 수정해야함
 	int i = 0;
 	while (1)
 	{

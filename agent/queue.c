@@ -88,6 +88,9 @@ void				signal_handle_p(int sig)
 {
 	//여기에 소켓 변수를 전역변수화 
 	(void)sig;
+	g->socket = socket(PF_INET, SOCK_STREAM, 0);
+	if (g->socket == -1)
+		err_by("socket error");
 	for (int i = 0; i < 10; i++)
 	{
 		if (connect(g->socket, (struct sockaddr*)&(g->agent_addr), sizeof(g->agent_addr)) == -1)
@@ -96,7 +99,10 @@ void				signal_handle_p(int sig)
 			usleep(1000 * 456);
 		}
 		else
+		{
+			printf("reconnect success\n");
 			return ;
+		}
 	}
 		err_by("agent connect error");
 }
