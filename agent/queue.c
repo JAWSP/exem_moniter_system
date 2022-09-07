@@ -2,6 +2,8 @@
 #include "object.h"
 #include "queue.h"
 
+g_lobal *g;
+
 queue *init_queue(queue *q)
 {
 	q = (queue *)malloc(sizeof(queue));
@@ -82,10 +84,28 @@ void send_data(queue *q, int sock)
 	pthread_mutex_unlock(&q->q_lock);
 }
 
+void				signal_handle_p(int sig)
+{
+	//여기에 소켓 변수를 전역변수화 
+	(void)sig;
+	for (int i = 0; i < 10; i++)
+	{
+		if (connect(g->socket, (struct sockaddr*)&(g->agent_addr), sizeof(g->agent_addr)) == -1)
+		{
+			printf("waiting.....");
+			usleep(1000 * 456);
+		}
+		else
+			return ;
+	}
+		err_by("agent connect error");
+}
+
 
 void *pth_queue_process(void *pq)
 {
 	queue *q = pq;
+	signal(SIGPIPE, signal_handle_p);
 
 	while (1)
 	{
@@ -96,7 +116,7 @@ void *pth_queue_process(void *pq)
 		}
 		else
 		{
-			send_data(q, q->socket);
+			send_data(q, g->socket);
 		}
 	}
 }

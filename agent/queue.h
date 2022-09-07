@@ -12,7 +12,6 @@ typedef struct s_queue
 {
 	unsigned int front;
 	unsigned int rear;
-	int socket;
 	pthread_mutex_t q_lock;
 	struct s_packet *packets[QUEUE_MAX];
 } queue;

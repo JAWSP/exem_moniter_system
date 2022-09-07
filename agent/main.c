@@ -2,30 +2,29 @@
 #include "packets.h"
 #include "queue.h"
 
+extern g_lobal *g;
 
 int main(void)
 {
-	//TODO 받은 내용 계산할 부분은 계산시키기
-	//TODO 소켓화 시켜서 넘겨주기
-	
-	struct sockaddr_in agent_addr;
+	//struct sockaddr_in agent_addr;
 	queue *q = NULL;
-	q = init_queue(q);
+	q = init_queue(q);	
+	if (!(g = (g_lobal *)malloc(sizeof(g_lobal))))
+		err_by("global malloc error");
 
 	pthread_t pid_c, pid_m, pid_n, pid_p, pid_q;
 
-	//그 뿐만 아니라 각종 초기화를 이쪽에서 하면 좋을 듯해보인다
-	q->socket = socket(PF_INET, SOCK_STREAM, 0);
-	if (q->socket == -1)
+	g->socket = socket(PF_INET, SOCK_STREAM, 0);
+	if (g->socket == -1)
 		err_by("socket error");
 
-	memset(&agent_addr, 0, sizeof(struct sockaddr_in));
+	memset(&(g->agent_addr), 0, sizeof(struct sockaddr_in));
 
-	agent_addr.sin_family = AF_INET;
-	agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	agent_addr.sin_port = htons(1234);
+	g->agent_addr.sin_family = AF_INET;
+	g->agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	g->agent_addr.sin_port = htons(1234);
 
-	if (connect(q->socket, (struct sockaddr*)&agent_addr, sizeof(agent_addr)) == -1)
+	if (connect(g->socket, (struct sockaddr*)&(g->agent_addr), sizeof(g->agent_addr)) == -1)
 		err_by("agent connect error");
 
 	pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)q);
@@ -41,7 +40,6 @@ int main(void)
 	pthread_join(pid_m, NULL);
 	pthread_join(pid_n, NULL);
 	pthread_join(pid_p, NULL);
-
 
         return (0);
 }

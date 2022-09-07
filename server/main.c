@@ -56,11 +56,13 @@ int main()
 	while (1)
 	{
 		agent_fd[i] = accept_agent(sock, &i);
-		//TODO recv가 중간에 문제 생기면 팅구고 다시 recv하게
-		if (recv(agent_fd[i], buf, 1024 *128, 0) > 0)
-			test(buf);
-		else
-			break ;
+		while (1)
+		{
+			if (recv(agent_fd[i], buf, 1024 *128, 0) > 0)
+				test(buf);
+			else
+				break ;
+		}	
 	}
 
 

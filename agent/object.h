@@ -20,35 +20,14 @@
 #define LOCAL_ADDR 2130706433
 
 typedef struct s_header header;
-/*
- * structs
- * 각각의 수집한 정보를 구조체 형식으로 저장
- */
 
-//OS사용 부분을 합친부분을 쓸지는 일단 보류
-
-//임시로 만들 전역변수
-/*
 typedef struct s_lobal
 {
-	struct timeval start_time;
-	int tmp;
+	struct sockaddr_in agent_addr;
+	int socket;
 } g_lobal;
-*/
-//아마 여기서 전역변수를 쓸 것 같은 느낌이 드는데
-typedef struct s_data
-{
-
-} data;
-
-//unsigned int
-
-/*
- * include func
- */
 
 //parse.c
-
 void *pth_parse_cpu(void *pq);
 void *pth_parse_mem(void *pq);
 void *pth_parse_packet(void *pq);

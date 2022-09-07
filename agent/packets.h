@@ -4,6 +4,7 @@
 
 #include "object.h"
 #include "../utils/utils.h"
+#include "signal.h"
 
 #pragma pack(push, 1)
 
