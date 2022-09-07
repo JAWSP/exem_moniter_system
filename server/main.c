@@ -27,13 +27,16 @@ void test(char *buf)
 int main()
 {
 
-	int sock;
+	int sock = 0;
 	int res = 0;
 	int agent_fd[13] = {0, };// 여러개의
 	char buf[1024 * 128];
 	struct sockaddr_in server_addr;
 
 	//통신 설정 초기 셋팅
+	int optval = 1;
+
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	sock = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock < 0)
 		err_by("server sock error");
@@ -64,7 +67,6 @@ int main()
 				break ;
 		}	
 	}
-
 
 	close(sock);
 	close(agent_fd[i]);

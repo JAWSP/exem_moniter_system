@@ -92,7 +92,7 @@ void				signal_handle_p(int sig)
 	{
 		if (connect(g->socket, (struct sockaddr*)&(g->agent_addr), sizeof(g->agent_addr)) == -1)
 		{
-			printf("waiting.....");
+			printf("waiting.....\n");
 			usleep(1000 * 456);
 		}
 		else
@@ -100,7 +100,6 @@ void				signal_handle_p(int sig)
 	}
 		err_by("agent connect error");
 }
-
 
 void *pth_queue_process(void *pq)
 {
