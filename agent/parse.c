@@ -18,7 +18,6 @@ void *pth_parse_cpu(void *pq)
 
 		diff_usec = 0;
 		//먼저 초기화 할껀 초기화
-		//+1하는 이유는 맨 마지막 null값 넣을려고
 		packet = init_packet(packet, 'c', 1);
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		head = (header *)packet->data;
@@ -82,7 +81,6 @@ void *pth_parse_mem(void *pq)
 		header *head;
 
 		packet = init_packet(packet, 'm', 1);
-		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		head = (header *)packet->data;
 		head = insert_header(head, 'm');
 		mem = (memUsage *)(packet->data + sizeof(header));
@@ -350,7 +348,6 @@ void *pth_parse_process(void *pq)
 		}
 		*/
 		q = enqueue(q, packet);
-		//send_data(packet, *sock);
 		
 		closedir(dir);
 		

@@ -11,6 +11,14 @@
 #include <netdb.h>
 #include "../utils/utils.h"
 
+typedef struct serv_global
+{ 	
+	int sock;
+	int flag;
+	int agent_fd;
+	pthread_mutex_t mutx;
+}g_serv;
+
 typedef struct s_agentInfo
 {
 	int id;
