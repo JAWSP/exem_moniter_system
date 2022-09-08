@@ -34,9 +34,9 @@ void *pth_server_loop(void *arg)
 	while (1)
 	{
 		if (recv(agent_fd, buf, 1024 *128, 0) > 0)
-			test(buf);
+			test(buf); //여기서 파싱하고 확인하고 처리할 예정
 		else
-			break ;
+			break ; //연결이 끊기면 루프끝->스레드끝
 	}
 	return ((void*)0);
 }
@@ -44,7 +44,6 @@ void *pth_server_loop(void *arg)
 int main()
 {
 	int res = 0;
-	int agent_fds[13] = {0, };// 여러개의
 	char buf[1024 * 128];
 	pthread_t pid;
 	struct sockaddr_in server_addr;
@@ -78,18 +77,12 @@ int main()
 	while (1)
 	{
 		gs->agent_fd = accept_agent(gs->sock, &i);
-		for (int c = 0; c < 13; c++)
-			agent_fds[c] = gs->agent_fd;
-		pthread_create(&pid, NULL, pth_server_loop, (void *)gs);
-		/*
-		while (1)
+		if (pthread_create(&pid, NULL, pth_server_loop, (void *)gs) == -1)
 		{
-			if (recv(agent_fd, buf, 1024 *128, 0) > 0)
-				test(buf);
-			else
-				break ;
+			printf("recv pthread create failed\n");
+			continue ;
 		}
-		*/
+		pthread_detach(pid);
 	}
 
 	close(gs->sock);
