@@ -2,7 +2,7 @@
 #include "packets.h"
 #include "queue.h"
 
-extern g_lobal *g;
+g_lobal *g;
 
 int main(void)
 {

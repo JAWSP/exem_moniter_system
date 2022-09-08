@@ -22,7 +22,7 @@ void *pth_parse_cpu(void *pq)
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		head = (header *)packet->data;
 		head = insert_header(head, 'c');
-		cpu = (cpuUsage *)(packet->data + sizeof(header) + sizeof(unsigned int));
+		cpu = (cpuUsage *)(packet->data + sizeof(header));
 
 		//루프 돌면서 측정 시작			
 		gettimeofday(&startTime, NULL);
@@ -83,7 +83,7 @@ void *pth_parse_mem(void *pq)
 		packet = init_packet(packet, 'm', 1);
 		head = (header *)packet->data;
 		head = insert_header(head, 'm');
-		mem = (memUsage *)(packet->data + sizeof(header) + sizeof(unsigned int));
+		mem = (memUsage *)(packet->data + sizeof(header));
 
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
@@ -188,7 +188,7 @@ void *pth_parse_packet(void *pq)
 		head = (header *)packet->data;
 		head = insert_header(head, 'n');
 		head->count = count;
-		np = (packUsage *)(packet->data + sizeof(header) + sizeof(unsigned int));
+		np = (packUsage *)(packet->data + sizeof(header));
 
 		diff_usec = 0;
 		gettimeofday(&startTime, NULL);
@@ -322,7 +322,7 @@ void *pth_parse_process(void *pq)
 		head = (header *)packet->data;
 		head = insert_header(head, 'p');
 		head->count = count;
-		proc = (procInfo *)(packet->data + sizeof(header) + sizeof(unsigned int));
+		proc = (procInfo *)(packet->data + sizeof(header));
 		
 		diff_usec = 0;	
 		gettimeofday(&startTime, NULL);
