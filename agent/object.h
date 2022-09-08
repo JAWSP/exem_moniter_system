@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pwd.h>
+#include <time.h>
 #include "../utils/utils.h"
 #include "packets.h"
 #include "queue.h"
@@ -23,6 +24,7 @@ typedef struct s_header header;
 
 typedef struct s_lobal
 {
+	unsigned int agent_id;
 	struct sockaddr_in agent_addr;
 	int socket;
 } g_lobal;

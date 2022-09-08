@@ -12,11 +12,16 @@ int main(void)
 	if (!(g = (g_lobal *)malloc(sizeof(g_lobal))))
 		err_by("global malloc error");
 
+
 	pthread_t pid_c, pid_m, pid_n, pid_p, pid_q;
 
 	g->socket = socket(PF_INET, SOCK_STREAM, 0);
 	if (g->socket == -1)
 		err_by("socket error");
+
+	//id설정
+	srand(time(NULL));
+	g->agent_id = (rand() % 99999999);	
 
 	memset(&(g->agent_addr), 0, sizeof(struct sockaddr_in));
 
