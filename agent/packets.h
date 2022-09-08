@@ -18,6 +18,7 @@ typedef struct s_packet
 typedef struct s_header
 {
 	//대충 헤더
+	unsigned int id;
 	char type_n_date[22];
 	int count;
 } header;

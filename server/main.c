@@ -21,10 +21,9 @@ int accept_agent(int sock, int *i)
 
 void test(char *buf)
 {
-	unsigned int *tmp = (unsigned int *)buf;
 	header *ttt;
-	ttt = (header *)(buf + sizeof(unsigned int));
-	printf("test : %u, %s, %d\n", *tmp, ttt->type_n_date, ttt->count);
+	ttt = (header *)(buf);
+	printf("test : %u, %s, %d\n", ttt->id, ttt->type_n_date, ttt->count);
 }
 
 void *pth_server_loop(void *arg)

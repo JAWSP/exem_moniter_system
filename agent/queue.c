@@ -2,7 +2,7 @@
 #include "object.h"
 #include "queue.h"
 
-g_lobal *g;
+extern g_lobal *g;
 
 queue *init_queue(queue *q)
 {

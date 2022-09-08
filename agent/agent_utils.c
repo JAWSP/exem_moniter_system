@@ -1,7 +1,7 @@
 #include "object.h"
 #include "packets.h"
 
-g_lobal *g;
+extern g_lobal *g;
 
 char *get_curr_time(void)
 {
@@ -25,35 +25,34 @@ packet *init_packet(packet *pack, char type, int count)
 		err_by("pack malloc_error");
 	if (type == 'c')
 	{
-		pack->len  = sizeof(header) + sizeof(cpuUsage) + sizeof(unsigned int) + 1;
+		pack->len  = sizeof(header) + sizeof(cpuUsage)+ 1;
 		pack->data = (unsigned char *)malloc(pack->len);
 		pack->data[pack->len - 1] = 0;
 	}
 	else if (type == 'm')
 	{
-		pack->len  = sizeof(header) + sizeof(cpuUsage) + sizeof(unsigned int) + 1;
+		pack->len  = sizeof(header) + sizeof(memUsage)+ 1;
 		pack->data = (unsigned char *)malloc(pack->len);
 		pack->data[pack->len - 1] = 0;
 	}
 	else if (type == 'n')
 	{
-		pack->len  = sizeof(header) + sizeof(cpuUsage) + sizeof(unsigned int) + 1;
+		pack->len  = sizeof(header) + sizeof(packUsage)+ 1;
 		pack->data = (unsigned char *)malloc(pack->len);
 		pack->data[pack->len - 1] = 0;
 	}
 	else if (type == 'p')
 	{
-		pack->len  = sizeof(header) + sizeof(cpuUsage) + sizeof(unsigned int) + 1;
+		pack->len  = sizeof(header) + sizeof(procInfo)+ 1;
 		pack->data = (unsigned char *)malloc(pack->len);
 		pack->data[pack->len - 1] = 0;
 	}
-	unsigned int *tmp = &g->agent_id;
-	tmp = (unsigned int *)pack->data;
 	return (pack);
 }
 
 header *insert_header(header *head, char type)
 {
+	head->id = g->agent_id;
 	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
 	if (type == 'c')
 		head->count = 1;
