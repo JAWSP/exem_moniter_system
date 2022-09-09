@@ -76,6 +76,7 @@ void send_data(queue *q, int sock)
 		return ;
 		err_by("packet send error");
 	}
+	usleep(100);
 	free(pack->data);
 	pack->data = NULL;
 	free(pack);

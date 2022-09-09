@@ -11,7 +11,6 @@ int accept_agent(int sock, int *i)
 	int agent_fd = 0;
 
 	as = sizeof(agent_addr);
-
 	agent_fd  = accept(sock, (struct sockaddr *)&agent_addr, &as);
 	if (agent_fd < 0)
 		err_by("accept failed");
@@ -28,12 +27,12 @@ void test(char *buf)
 
 void *pth_server_loop(void *arg)
 {
-	char buf[1024 * 128];
+	char buf[1024 * 256];
 	int agent_fd = gs->agent_fd;
 
 	while (1)
 	{
-		if (recv(agent_fd, buf, 1024 *128, 0) > 0)
+		if (recv(agent_fd, buf, 1024 *256, 0) > 0)
 			test(buf); //여기서 파싱하고 확인하고 처리할 예정
 		else
 			break ; //연결이 끊기면 루프끝->스레드끝
@@ -44,7 +43,6 @@ void *pth_server_loop(void *arg)
 int main()
 {
 	int res = 0;
-	char buf[1024 * 128];
 	pthread_t pid;
 	struct sockaddr_in server_addr;
 
