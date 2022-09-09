@@ -40,6 +40,6 @@ void *pth_queue_process(void *pq);
 char *get_curr_time(void);
 int get_count(char type, char *cmd);
 packet *init_packet(packet *pack, char type, int count);
-header *insert_header(header *head, char type);
+header *insert_header(header *head, char type, packet *p);
 
 # endif

@@ -21,7 +21,10 @@ typedef struct serv_global
 
 typedef struct s_agentInfo
 {
+	char *raw_data;
 	int id;
+	char type;
+	char date[20];
 }agentInfo;
 
 #endif

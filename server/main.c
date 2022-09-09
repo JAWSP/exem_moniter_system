@@ -18,22 +18,47 @@ int accept_agent(int sock, int *i)
 	return (agent_fd);
 }
 
-void test(char *buf)
+void test(char *buf, int size, agentInfo *ag)
 {
 	header *ttt;
-	ttt = (header *)(buf);
-	printf("test : %u, %s, %d\n", ttt->id, ttt->type_n_date, ttt->count);
+	static int full_size = 0;
+	static int curr_size = 0;
+
+	if (curr_size == 0)
+	{
+		ttt = (header *)(buf);
+		printf("test : %u, %s, %d, recv size : %d, full size : %d\n",
+				ttt->id, ttt->type_n_date, ttt->count, size, ttt->size);
+		curr_size += size;
+		full_size = ttt->size;
+		memcpy(ag->raw_data, buf, size);
+	}
+	else
+	{
+		memcpy(ag->raw_data + curr_size, buf, size);
+		curr_size += size;
+	}
+	if (curr_size == full_size)
+	{
+		//대충 유효한지 판단하거나 큐에다 집어넣는 함수
+		curr_size = 0;
+		free(ag);
+	}
 }
 
 void *pth_server_loop(void *arg)
 {
 	char buf[1024 * 256];
 	int agent_fd = gs->agent_fd;
+	int size;
 
 	while (1)
 	{
-		if (recv(agent_fd, buf, 1024 *256, 0) > 0)
-			test(buf); //여기서 파싱하고 확인하고 처리할 예정
+		agentInfo *ag;
+		if (!(ag = (agentInfo *)malloc(sizeof(agentInfo))))
+			err_by("agent info malloc error");
+		if ((size = recv(agent_fd, buf, 1024 *256, 0)) > 0)
+			test(buf, size, ag); //여기서 파싱하고 확인하고 처리할 예정
 		else
 			break ; //연결이 끊기면 루프끝->스레드끝
 	}

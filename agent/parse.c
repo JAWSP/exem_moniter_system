@@ -21,7 +21,7 @@ void *pth_parse_cpu(void *pq)
 		packet = init_packet(packet, 'c', 1);
 		//이렇게 형변환을 시키면 알아서 시리얼라이즈가 된다고 한다
 		head = (header *)packet->data;
-		head = insert_header(head, 'c');
+		head = insert_header(head, 'c', packet);
 		cpu = (cpuUsage *)(packet->data + sizeof(header));
 
 		//루프 돌면서 측정 시작			
@@ -82,7 +82,7 @@ void *pth_parse_mem(void *pq)
 
 		packet = init_packet(packet, 'm', 1);
 		head = (header *)packet->data;
-		head = insert_header(head, 'm');
+		head = insert_header(head, 'm', packet);
 		mem = (memUsage *)(packet->data + sizeof(header));
 
 		diff_usec = 0;
@@ -186,7 +186,7 @@ void *pth_parse_packet(void *pq)
 		packet = init_packet(packet, 'n', count);
 		
 		head = (header *)packet->data;
-		head = insert_header(head, 'n');
+		head = insert_header(head, 'n', packet);
 		head->count = count;
 		np = (packUsage *)(packet->data + sizeof(header));
 
@@ -320,7 +320,7 @@ void *pth_parse_process(void *pq)
 		packet = init_packet(packet, 'p', count);
 		
 		head = (header *)packet->data;
-		head = insert_header(head, 'p');
+		head = insert_header(head, 'p', packet);
 		head->count = count;
 		proc = (procInfo *)(packet->data + sizeof(header));
 		

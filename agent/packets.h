@@ -21,6 +21,7 @@ typedef struct s_header
 	unsigned int id;
 	char type_n_date[22];
 	int count;
+	int size;
 } header;
 
 //여기가 바디

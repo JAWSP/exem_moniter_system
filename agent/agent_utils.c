@@ -50,9 +50,10 @@ packet *init_packet(packet *pack, char type, int count)
 	return (pack);
 }
 
-header *insert_header(header *head, char type)
+header *insert_header(header *head, char type, packet *p)
 {
 	head->id = g->agent_id;
+	head->size = p->len;
 	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
 	if (type == 'c')
 		head->count = 1;
