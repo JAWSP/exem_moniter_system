@@ -18,7 +18,7 @@ int accept_agent(int sock, int *i)
 	return (agent_fd);
 }
 
-void test(char *buf, int size, agentInfo *ag)
+int get_recv(char *buf, int size, agentInfo *ag)
 {
 	header *ttt;
 	static int full_size = 0;
@@ -29,8 +29,18 @@ void test(char *buf, int size, agentInfo *ag)
 		ttt = (header *)(buf);
 		printf("test : %u, %s, %d, recv size : %d, full size : %d\n",
 				ttt->id, ttt->type_n_date, ttt->count, size, ttt->size);
+		ag->type = ttt->type_n_date[0];
+		//만약에 받은 타입에 문제가 생기면 종료
+		//TODO 나중에 여유가 생기면 id도 유효하지 않으면 지우는걸로
+		if (ag->type != 'c' || ag->type != 'm' || ag->type != 'n' || ag->type != 'p')
+		{
+			free(ag);
+			return (-1);
+		}
 		curr_size += size;
 		full_size = ttt->size;
+		ag->id = ttt->id;
+		strcpy(ag->date, &(ttt->type_n_date[2]));
 		memcpy(ag->raw_data, buf, size);
 	}
 	else
@@ -44,6 +54,7 @@ void test(char *buf, int size, agentInfo *ag)
 		curr_size = 0;
 		free(ag);
 	}
+	return (0);
 }
 
 void *pth_server_loop(void *arg)
@@ -58,7 +69,10 @@ void *pth_server_loop(void *arg)
 		if (!(ag = (agentInfo *)malloc(sizeof(agentInfo))))
 			err_by("agent info malloc error");
 		if ((size = recv(agent_fd, buf, 1024 *256, 0)) > 0)
-			test(buf, size, ag); //여기서 파싱하고 확인하고 처리할 예정
+		{
+			if (get_recv(buf, size, ag) == -1)
+				break ;
+		}
 		else
 			break ; //연결이 끊기면 루프끝->스레드끝
 	}
