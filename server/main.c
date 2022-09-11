@@ -32,8 +32,9 @@ int get_recv(char *buf, int size, agentInfo *ag)
 		ag->type = ttt->type_n_date[0];
 		//만약에 받은 타입에 문제가 생기면 종료
 		//TODO 나중에 여유가 생기면 id도 유효하지 않으면 지우는걸로
-		if (ag->type != 'c' || ag->type != 'm' || ag->type != 'n' || ag->type != 'p')
+		if (ag->type != 'c' && ag->type != 'm' && ag->type != 'n' && ag->type != 'p')
 		{
+			printf("TYPE %c IS NOT VERIFIED\n", ag->type);
 			free(ag);
 			return (-1);
 		}
@@ -50,6 +51,14 @@ int get_recv(char *buf, int size, agentInfo *ag)
 	}
 	if (curr_size == full_size)
 	{
+		ttt = (header *)(ag->raw_data);
+		procInfo *tmp2 = (procInfo *)(ag->raw_data + sizeof(header));
+		for (int loop = 0; loop < ttt->count; loop++)
+		{
+			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
+					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
+			tmp2++;
+		}
 		//대충 유효한지 판단하거나 큐에다 집어넣는 함수
 		curr_size = 0;
 		free(ag);
