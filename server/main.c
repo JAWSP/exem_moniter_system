@@ -73,8 +73,8 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 
 		curr_size = 0;
 		full_size = 0;
-		free(ag);
-		ag = NULL;
+//		free(ag);
+//		ag = NULL;
 	}
 	return (0);
 }
@@ -145,7 +145,7 @@ int main(void)
 	init_serv(&q, &server_addr);
 
 
-	if (pthread_create(&q_pid, NULL, pth_squeue_process, (void *)gs) == -1)
+	if (pthread_create(&q_pid, NULL, pth_squeue_process, (void *)q) == -1)
 		err_by("queue pthread create failed");
 	while (1)
 	{
