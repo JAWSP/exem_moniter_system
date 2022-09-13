@@ -16,7 +16,7 @@ typedef struct serv_global
 	int sock;
 	int flag;
 	int agent_fd;
-	pthread_mutex_t mutx;
+	pthread_mutex_t g_mutx;
 }g_serv;
 
 typedef struct s_agentInfo

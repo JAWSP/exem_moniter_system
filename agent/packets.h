@@ -1,6 +1,5 @@
 #ifndef PACKETS_H
 # define PACKETS_H
-//위에 이름 바꾸셈
 
 #include "object.h"
 #include "../utils/utils.h"
@@ -10,14 +9,12 @@
 
 typedef struct s_packet
 {
-	//보낼때 data만 보낸다 패킷통채로 보내는게 아님
 	unsigned char *data;
 	int len;
 } packet;
 
 typedef struct s_header
 {
-	//대충 헤더
 	unsigned int id;
 	char type_n_date[22];
 	int count;

@@ -1,12 +1,11 @@
 NAME = server
-MAIN = main.c
-SRCS = ../utils/utils.c
+MAIN = main.c queue.c
+SRCS = ../utils/utils.c 
 MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}
 
 CC = gcc
-#CFLAGS = -Wall -Wextra -Werror
 PTHREAD = -lpthread
 
 RM = rm -f
