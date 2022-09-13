@@ -76,9 +76,9 @@ void *pth_parse_n_write(void *pq)
 		parse_cpu(ag, fd);
 	else if (ag->type == 'm')
 		parse_mem(ag, fd);
-	/*
 	else if (ag->type == 'n')
 		parse_pack(ag ,fd);
+	/*
 	else if (ag->type == 'p')
 		parse_proc(ag ,fd);
 	*/
@@ -96,7 +96,7 @@ void *pth_squeue_process(void *pq)
 	{
 		if (s_empty(q))
 		{
-			usleep(409);
+			usleep(409 * 300);
 			continue ;
 		}
 		else
@@ -108,6 +108,7 @@ void *pth_squeue_process(void *pq)
 				err_by("parse thread create error");
 				continue ;
 			}
+			usleep(409 * 800);
 			pthread_detach(p_pid);
 		}
 	}

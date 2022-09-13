@@ -68,13 +68,9 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 		}
 		*/
 		q = s_enqueue(q, ag);
-		//대충 유효한지 판단하거나 큐에다 집어넣는 함수
-		//근데 큐가 막히면 어쩌지
 
 		curr_size = 0;
 		full_size = 0;
-//		free(ag);
-//		ag = NULL;
 	}
 	return (0);
 }

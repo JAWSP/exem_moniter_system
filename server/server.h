@@ -32,4 +32,6 @@ typedef struct s_agentInfo
 
 void parse_cpu(agentInfo *ag, int fd);
 void parse_mem(agentInfo *ag, int fd);
+void parse_pack(agentInfo *ag, int fd);
+
 #endif
