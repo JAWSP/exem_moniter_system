@@ -1,5 +1,5 @@
 NAME = server
-MAIN = main.c queue.c
+MAIN = main.c queue.c parse.c
 SRCS = ../utils/utils.c 
 MEM = -fsanitize=address
 

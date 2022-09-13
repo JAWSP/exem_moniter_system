@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <fcntl.h>
 #include "../utils/utils.h"
 
 typedef struct serv_global
@@ -16,7 +17,7 @@ typedef struct serv_global
 	int sock;
 	int flag;
 	int agent_fd;
-	pthread_mutex_t g_mutx;
+	pthread_mutex_t g_lock;
 }g_serv;
 
 typedef struct s_agentInfo
@@ -24,8 +25,11 @@ typedef struct s_agentInfo
 	//이후에 길이를 받은 즉시 할당으로 바뀔 수 있음
 	char raw_data[1024 * 256];
 	int id;
+	int count;
 	char type;
 	char date[20];
 }agentInfo;
 
+void parse_cpu(agentInfo *ag, int fd);
+void parse_mem(agentInfo *ag, int fd);
 #endif

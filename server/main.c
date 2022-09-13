@@ -27,9 +27,13 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 	if (curr_size == 0)
 	{
 		ttt = (header *)(buf);
+
+		ag->id = ttt->id;
+		ag->type = ttt->type_n_date[0];
+		ag->count = ttt->count;
+		strcpy(ag->date, &(ttt->type_n_date[2]));
 		printf("test : %u, %s, %d, recv size : %d, full size : %d\n",
 				ttt->id, ttt->type_n_date, ttt->count, size, ttt->size);
-		ag->type = ttt->type_n_date[0];
 		//만약에 받은 타입에 문제가 생기면 종료
 		//TODO 나중에 여유가 생기면 id도 유효하지 않으면 지우는걸로
 		if (ag->type != 'c' && ag->type != 'm' && ag->type != 'n' && ag->type != 'p')
@@ -40,8 +44,6 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 		}
 		curr_size += size;
 		full_size = ttt->size;
-		ag->id = ttt->id;
-		strcpy(ag->date, &(ttt->type_n_date[2]));
 		memcpy(ag->raw_data, buf, size);
 	}
 	else
@@ -70,6 +72,7 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 		//근데 큐가 막히면 어쩌지
 
 		curr_size = 0;
+		full_size = 0;
 		free(ag);
 		ag = NULL;
 	}
@@ -105,6 +108,7 @@ void init_serv(squeue **q, struct sockaddr_in *server_addr)
 	//queue init
 	if (!(gs = (g_serv *)malloc(sizeof(g_serv))))
 		err_by("global malloc error");
+	pthread_mutex_init(&gs->g_lock, NULL);
 	*q = init_squeue(*q);
 
 	//통신 설정 초기 셋팅
@@ -132,7 +136,7 @@ void init_serv(squeue **q, struct sockaddr_in *server_addr)
 	listen(gs->sock, 13);
 }
 
-int main()
+int main(void)
 {
 	pthread_t pid, q_pid;
 	struct sockaddr_in server_addr;
