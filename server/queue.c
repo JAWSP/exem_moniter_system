@@ -78,10 +78,8 @@ void *pth_parse_n_write(void *pq)
 		parse_mem(ag, fd);
 	else if (ag->type == 'n')
 		parse_pack(ag ,fd);
-	/*
 	else if (ag->type == 'p')
 		parse_proc(ag ,fd);
-	*/
 	free(ag);
 	ag = NULL;
 	return ((void *)0);

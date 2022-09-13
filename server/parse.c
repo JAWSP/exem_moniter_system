@@ -9,6 +9,9 @@ void parse_cpu(agentInfo *ag, int fd)
     char output[256];
 
     cpuUsage *cu = (cpuUsage *)(ag->raw_data + sizeof(header));
+
+	//이렇게 한줄씩 한가지 파일에다 박는다
+	//TODO 뭔가 더 가독성이 좋은 방법이 있을텐데...
     sprintf(output, "id : %d, type : %c, date : %s, usr = %d,sys = %d, idle = %d, iowait = %d\n",
 		ag->id, ag->type, ag->date, cu->usr, cu->sys, cu->idle, cu->iowait);
 	pthread_mutex_lock(&gs->g_lock);
@@ -39,12 +42,48 @@ void parse_pack(agentInfo *ag, int fd)
 	while (i < ag->count)
 	{
 		sprintf(output, "id : %d, type : %c, date : %s, interface = %s, in byte : %d, pac : %d, out byte : %d, pac : %d\n",
-					ag->id, ag->type, ag->date, pu->inter, pu->in_bytes, pu->in_packets, pu->out_bytes, pu->out_packets);
+					ag->id,
+					ag->type,
+					ag->date,
+					pu->inter,
+					pu->in_bytes,
+					pu->in_packets,
+					pu->out_bytes,
+					pu->out_packets);
 
 		pthread_mutex_lock(&gs->g_lock);
 		write(fd, output, strlen(output));
 		pthread_mutex_unlock(&gs->g_lock);
-		
+
+		i++;
+		pu++;
+	}
+	
+	close(fd);
+}
+
+void parse_proc(agentInfo *ag, int fd)
+{
+	char output[1024];
+
+	procInfo *pu = (procInfo *)(ag->raw_data + sizeof(header));
+	int i = 0;
+		while (i < ag->count)
+	{
+		sprintf(output, "id : %d, type : %c, date : %s, name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
+					ag->id,
+					ag->type,
+					ag->date,
+					pu->name,
+					pu->pid,
+					pu->ppid,
+					pu->cpu_time,
+					pu->user_name,
+					pu->cmd_line);
+		pthread_mutex_lock(&gs->g_lock);
+		write(fd, output, strlen(output));
+		pthread_mutex_unlock(&gs->g_lock);
+
 		i++;
 		pu++;
 	}
