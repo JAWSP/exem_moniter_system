@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include "../utils/utils.h"
 
+typedef struct serv_queue squeue;
 typedef struct serv_global
 { 	
 	int sock;
@@ -28,11 +29,21 @@ typedef struct s_agentInfo
 	int count;
 	char type;
 	char date[20];
+	char recv_date[20];
 }agentInfo;
 
+//parse.c
 void parse_cpu(agentInfo *ag, int fd);
 void parse_mem(agentInfo *ag, int fd);
 void parse_pack(agentInfo *ag, int fd);
 void parse_proc(agentInfo *ag, int fd);
+
+//recv_loop.c
+void *pth_server_loop(void *arg);
+int get_recv(char *buf, int size, agentInfo *ag, squeue *q);
+
+//serv_utils.c
+char *get_curr_day(void);
+char *get_curr_time(void);
 
 #endif

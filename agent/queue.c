@@ -74,9 +74,9 @@ void send_data(queue *q, int sock)
 		usleep(920);
 		pthread_mutex_unlock(&q->q_lock);
 		return ;
-		err_by("packet send error");
+		//err_by("packet send error");
 	}
-	usleep(100);
+	usleep(916);
 	free(pack->data);
 	pack->data = NULL;
 	free(pack);
@@ -118,7 +118,7 @@ void *pth_queue_process(void *pq)
 	{
 		if (is_empty(q))
 		{
-			usleep(409);
+			usleep(916);
 			continue ;
 		}
 		else

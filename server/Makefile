@@ -1,6 +1,6 @@
 NAME = server
-MAIN = main.c queue.c parse.c
-SRCS = ../utils/utils.c 
+MAIN = main.c
+SRCS = ../utils/utils.c queue.c parse.c recv_loop.c server_utils.c
 MEM = -fsanitize=address
 
 OBJS = ${SRCS:.c=.o}
