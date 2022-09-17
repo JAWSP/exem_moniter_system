@@ -52,7 +52,7 @@ packet *init_packet(packet *pack, char type, int count)
 
 header *insert_header(header *head, char type, packet *p)
 {
-	head->id = g->agent_id;
+	strcpy(head->id, g->id);
 	head->size = p->len;
 	sprintf(head->type_n_date, "%c %s", type, get_curr_time());
 	if (type == 'c')

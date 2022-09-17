@@ -15,7 +15,7 @@ typedef struct s_packet
 
 typedef struct s_header
 {
-	unsigned int id;
+	char id[8];
 	char type_n_date[22];
 	int count;
 	int size;

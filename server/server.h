@@ -18,18 +18,22 @@ typedef struct serv_global
 	int sock;
 	int flag;
 	int agent_fd;
+	char ids[9][9];
+	char keys[9][9];
 	pthread_mutex_t g_lock;
+	pthread_mutex_t g_comu_lock;
 }g_serv;
 
 typedef struct s_agentInfo
 {
 	//이후에 길이를 받은 즉시 할당으로 바뀔 수 있음
 	char raw_data[1024 * 256];
-	int id;
-	int count;
+	char id[8];
 	char type;
 	char date[20];
 	char recv_date[20];
+	int count;
+	int indx;
 }agentInfo;
 
 //parse.c
@@ -45,5 +49,6 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q);
 //serv_utils.c
 char *get_curr_day(void);
 char *get_curr_time(void);
+int certification(void);
 
 #endif

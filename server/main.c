@@ -21,10 +21,33 @@ int accept_agent(int sock)
 void init_serv(squeue **q, struct sockaddr_in *server_addr)
 {
 	//global init
-	//queue init
 	if (!(gs = (g_serv *)malloc(sizeof(g_serv))))
 		err_by("global malloc error");
+	pthread_mutex_init(&gs->g_comu_lock, NULL);
 	pthread_mutex_init(&gs->g_lock, NULL);
+	int fd;
+	fd = open ("./id", O_RDONLY);
+	if (fd < 0)
+		err_by("cannot open ids"); 
+	for (int i = 0; i < 9; i++)
+	{
+		if (read(fd, gs->ids[i], 9) < 0)
+			err_by("cannot read ids");
+		gs->ids[i][8] = 0;
+	//	printf ("%d : %s\n", i, gs->ids[i]);
+	}
+
+	fd = open ("./key", O_RDONLY);
+	if (fd < 0)
+		err_by("cannot open keys"); 
+	for (int i = 0; i < 9; i++)
+	{
+		if (read(fd, gs->keys[i], 9) < 0)
+			err_by("cannot read ids");
+		gs->keys[i][8] = 0;
+	}
+
+	//queue init
 	*q = init_squeue(*q);
 
 	//통신 설정 초기 셋팅
@@ -59,7 +82,8 @@ int main(void)
 	squeue *q;
 
 	init_serv(&q, &server_addr);
-
+	for (int i = 0; i < 9; i++)
+		printf("id %d : %s\n", i, gs->ids[i]);
 
 	if (pthread_create(&q_pid, NULL, pth_squeue_process, (void *)q) == -1)
 		err_by("queue pthread create failed");

@@ -8,7 +8,7 @@ void write_header(agentInfo *ag, int fd, char *msg)
 {
 	char output[256];
 
-	sprintf(output, "-------------------- id %d's %s, collect time : %s ---------------------\n\n",
+	sprintf(output, "------------------- id %s's %s, collect time : %s --------------------\n\n",
 		ag->id,
 		msg,
 		ag->date
@@ -22,15 +22,13 @@ void write_tail(agentInfo *ag, int fd, char *msg)
 {
 	char output[256];
 
-	sprintf(output, "\n---------------- id %d's %s, write time : %s | raw : %d ----------------\n\n\n",
+	sprintf(output, "\n---------------- id %s's %s, write time : %s | raw : %d ----------------\n\n\n",
 		ag->id,
 		msg,
 		get_curr_time(),
 		ag->count
 	);
-	pthread_mutex_lock(&gs->g_lock);
 	write(fd, output, strlen(output));
-	pthread_mutex_unlock(&gs->g_lock);	
 }
 
 void parse_cpu(agentInfo *ag, int fd)
@@ -40,7 +38,7 @@ void parse_cpu(agentInfo *ag, int fd)
 	write_header(ag, fd, "cpuUsageTime");
     cpuUsage *cu = (cpuUsage *)(ag->raw_data + sizeof(header));
 
-    sprintf(output, "[%s], usr = %d, sys = %d, idle = %d, iowait = %d\n",
+    sprintf(output, "[%s] usr = %d, sys = %d, idle = %d, iowait = %d\n",
 		 ag->recv_date, cu->usr, cu->sys, cu->idle, cu->iowait);
 
 	pthread_mutex_lock(&gs->g_lock);
@@ -57,7 +55,7 @@ void parse_mem(agentInfo *ag, int fd)
 	write_header(ag, fd, "memUsage");
     memUsage *mu = (memUsage *)(ag->raw_data + sizeof(header));
 
-    sprintf(output, "[%s], total = %d, used = %d, free = %d | swap_toal = %d, swap_used = %d\n",
+    sprintf(output, "[%s] total = %d, used = %d, free = %d | swap_toal = %d, swap_used = %d\n",
 				ag->recv_date, mu->total, mu->used, mu->free, mu->swap_total, mu->swap_used);  
 
 	pthread_mutex_lock(&gs->g_lock);

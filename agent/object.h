@@ -24,7 +24,8 @@ typedef struct s_header header;
 
 typedef struct s_lobal
 {
-	unsigned int agent_id;
+	char id[8];
+	char key[8];
 	struct sockaddr_in agent_addr;
 	int socket;
 } g_lobal;
@@ -37,6 +38,7 @@ void *pth_parse_process(void *pq);
 void *pth_queue_process(void *pq);
 
 //agent_utils.c
+//int certification(char *arg);
 char *get_curr_time(void);
 int get_count(char type, char *cmd);
 packet *init_packet(packet *pack, char type, int count);
