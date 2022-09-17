@@ -91,8 +91,12 @@ void				signal_handle_p(int sig)
 	(void)sig;
 	close(g->socket);
 	g->socket = socket(PF_INET, SOCK_STREAM, 0);
+	g->agent_addr.sin_family = AF_INET;
+	g->agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	g->agent_addr.sin_port = htons(1234);
 	if (g->socket == -1)
 		err_by("socket error");
+	usleep(1000 * 300);
 	for (int i = 0; i < 15; i++)
 	{
 		if (connect(g->socket, (struct sockaddr*)&(g->agent_addr), sizeof(g->agent_addr)) == -1)
