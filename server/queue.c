@@ -2,6 +2,8 @@
 #include "server_queue.h"
 #include "server.h"
 
+extern g_serv *gs;
+
 squeue *init_squeue(squeue *q)
 {
 	q = (squeue *)malloc(sizeof(squeue));
@@ -67,7 +69,7 @@ void *pth_parse_n_write(void *pq)
 	squeue *q = (squeue *)pq;
 	agentInfo *ag = NULL;
 	ag = s_dequeue(q);
-	sprintf(path, "../data/%s", ag->id);
+	sprintf(path, "../data/%s", gs->ids[ag->indx]);
 
 	fd = open(path, O_WRONLY | O_APPEND | O_CREAT, 0644);
 	if (fd == -1)

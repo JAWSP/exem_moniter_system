@@ -102,6 +102,13 @@ void				signal_handle_p(int sig)
 		}
 		else
 		{
+			char buf[4];
+			if ((send(g->socket, g->key, 8, 0)) < 0)
+				err_by("send failed");
+			if ((recv(g->socket, buf, 2, 0)) < 0)
+				err_by("recv failed");
+			if (strcmp(buf, "OK") != 0)
+				err_by("your key is not certified\n");
 			printf("reconnect success\n");
 			return ;
 		}
