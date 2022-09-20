@@ -36,6 +36,26 @@ typedef struct s_agentInfo
 	int indx;
 }agentInfo;
 
+typedef struct s_before
+{
+	char id[8];
+	char agent_name[8];
+	char ip[15];
+	char begin_time[20];
+	int port;
+	int pid;
+} before;
+
+typedef struct s_after
+{
+	char id[8];
+	char agent_name[8];
+	char elapse_time[20];
+	int pid;
+	int size;
+	int time;
+} after;
+
 //parse.c
 void parse_cpu(agentInfo *ag, int fd);
 void parse_mem(agentInfo *ag, int fd);

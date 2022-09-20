@@ -336,17 +336,6 @@ void *pth_parse_process(void *pq)
 				proc++;
 			}
 		}
-
-		/*
-		unsigned char *bb = packet->data;
-		packUsage *tmp = (porcInfo *)(bb + sizeof(header));
-		for (int loop = 0; loop < count; loop++)
-		{
-			printf("name = %s, pid : %d, ppid : %d, cpu usage : %d, username %s, cmdline %s\n",
-					tmp2->name, tmp2->pid, tmp2->ppid, tmp2->cpu_time, tmp2->user_name, tmp2->cmd_line);
-			tmp2++;
-		}
-		*/
 		q = enqueue(q, packet);
 		
 		closedir(dir);

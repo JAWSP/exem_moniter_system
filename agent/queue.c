@@ -75,7 +75,6 @@ void send_data(queue *q, int sock)
 		usleep(920);
 		pthread_mutex_unlock(&q->q_lock);
 		return ;
-		//err_by("packet send error");
 	}
 	usleep(916);
 	free(pack->data);
@@ -90,8 +89,7 @@ void				signal_handle_p(int sig)
 {
 	//여기에 소켓 변수를 전역변수화 
 	(void)sig;
-	g->socket = 0;
-	//close(g->socket);
+	close(g->socket);
 	g->socket = socket(PF_INET, SOCK_STREAM, 0);
 	g->agent_addr.sin_family = AF_INET;
 	g->agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -111,11 +109,6 @@ void				signal_handle_p(int sig)
 			char buf[9];
 			int fd = 0;
 			int res = 0;
-			if ((fd = open("./key", O_RDWR | O_TRUNC | O_CREAT, 0644)) < 0)
-				err_by("open key failed");
-			if ((res = read(fd, buf, 8)) < 0)
-				err_by("read key failed");
-			strcpy(g->key, buf);
 			if ((send(g->socket, g->key, 8, 0)) < 0)
 				err_by("send failed");
 			if ((recv(g->socket, buf, 2, 0)) < 0)

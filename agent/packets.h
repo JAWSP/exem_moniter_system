@@ -7,11 +7,6 @@
 
 #pragma pack(push, 1)
 
-//before => header, UDP
-//body => body, TCP
-//after => tail, UDP
-//tail은 따로 할 것인가..?
-
 typedef struct s_packet
 {
 	unsigned char *data;
@@ -22,26 +17,9 @@ typedef struct s_header //나중에 before가 된다
 {
 	char id[8];
 	char type_n_date[22];
-	char agent_name[8];
-	char ip[15];
-	int port;
-	int pid;
 	int count;
 	int size;
 } header;
-
-/*
-typedef struct s_before
-{
-	char id[8];
-	char type_n_date[22];
-	char agent_name[8];
-	char ip[15];
-	int port;
-	int pid;
-	int size;
-}
-*/
 
 typedef struct s_cpuUsage
 {

@@ -54,46 +54,6 @@ int certification(char *arg)
 	return (1);
 }
 
-/*
-void get_this_info(void)
-{
-	struct dirent *buf = NULL;
-	DIR *dir = NULL;
-	FILE *fs = NULL;
-	int pid = 0;
-	char cmd[40], tmp[1024], name[512];
-
-	//net info
-	g->port = ntohs(g->agent_addr.sin_port);
-	inet_ntop(AF_INET, &g->agent_addr.sin_addr, g->ip, INET_ADDRSTRLEN);
-	printf("port : %d, ip : %s\n", g->port, g->ip);
-	//process info
-	dir = open_dir(dir, "/proc");
-	while ((buf = readdir(dir)) != NULL)
-	{
-		if ((pid = atoi(buf->d_name)) > 0)
-		{
-			sprintf(cmd, "/proc/%d/status", pid);
-			fs = open_fs(fs, cmd);	
-			fgets(tmp, BUFF_SIZE, fs);
-			if (!sscanf(tmp, "%*s %s", name))
-				err_by("process name sscanf error");
-			name[strlen(name)] = '\0';
-			if (strcmp("monitor", name) == 0)
-			{
-					strcpy(g->name ,name);
-					g->pid = pid;
-					fclose(fs);
-					closedir(dir);
-					return ;
-			}
-			fclose(fs);
-		}
-	}
-	err_by("not found process info");
-}
-*/
-
 int main(int argc, char **argv)
 {
 	//struct sockaddr_in agent_addr;

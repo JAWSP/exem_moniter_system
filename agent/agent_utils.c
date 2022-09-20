@@ -59,10 +59,6 @@ header *insert_header(header *head, char type, packet *p)
 		head->count = 1;
 	else if (type == 'm')
 		head->count = 1;
-	strcpy(head->agent_name, g->name);
-	strcpy(head->ip, g->ip);
-	head->port = g->port;
-	head->pid = g->pid;
 	return (head);
 }
 

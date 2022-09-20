@@ -4,6 +4,7 @@
 
 extern g_serv *gs;
 
+//TODO before,after로 바꿔야지
 void write_header(agentInfo *ag, int fd, char *msg)
 {
 	char output[256];
@@ -15,7 +16,7 @@ void write_header(agentInfo *ag, int fd, char *msg)
 	);
 	pthread_mutex_lock(&gs->g_lock);
 	write(fd, output, strlen(output));
-	pthread_mutex_unlock(&gs->g_lock);	
+	pthread_mutex_unlock(&gs->g_lock);
 }
 
 void write_tail(agentInfo *ag, int fd, char *msg)
