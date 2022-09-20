@@ -1,6 +1,7 @@
 #include "packets.h"
 #include "object.h"
 #include "queue.h"
+#include <fcntl.h>
 
 extern g_lobal *g;
 
@@ -89,7 +90,8 @@ void				signal_handle_p(int sig)
 {
 	//여기에 소켓 변수를 전역변수화 
 	(void)sig;
-	close(g->socket);
+	g->socket = 0;
+	//close(g->socket);
 	g->socket = socket(PF_INET, SOCK_STREAM, 0);
 	g->agent_addr.sin_family = AF_INET;
 	g->agent_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -106,7 +108,14 @@ void				signal_handle_p(int sig)
 		}
 		else
 		{
-			char buf[4];
+			char buf[9];
+			int fd = 0;
+			int res = 0;
+			if ((fd = open("./key", O_RDWR | O_TRUNC | O_CREAT, 0644)) < 0)
+				err_by("open key failed");
+			if ((res = read(fd, buf, 8)) < 0)
+				err_by("read key failed");
+			strcpy(g->key, buf);
 			if ((send(g->socket, g->key, 8, 0)) < 0)
 				err_by("send failed");
 			if ((recv(g->socket, buf, 2, 0)) < 0)

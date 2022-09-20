@@ -54,6 +54,7 @@ int certification(char *arg)
 	return (1);
 }
 
+
 void get_this_info(void)
 {
 	struct dirent *buf = NULL;
@@ -105,6 +106,8 @@ int main(int argc, char **argv)
 
 	pthread_t pid_c, pid_m, pid_n, pid_p, pid_q;
 
+	g->socket = 0;
+	
 	g->socket = socket(PF_INET, SOCK_STREAM, 0);
 	if (g->socket == -1)
 		err_by("socket error");
@@ -120,8 +123,9 @@ int main(int argc, char **argv)
 
 	if (!certification((argc == 2) ? argv[1] : "testtest"))
 		err_by("certification failed!");
+	
 
-	get_this_info();
+	//get_this_info();
 
 	pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)q);
 	pthread_create(&pid_m, NULL, pth_parse_mem, (void *)q);

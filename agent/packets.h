@@ -30,7 +30,19 @@ typedef struct s_header //나중에 before가 된다
 	int size;
 } header;
 
-//여기가 바디
+/*
+typedef struct s_before
+{
+	char id[8];
+	char type_n_date[22];
+	char agent_name[8];
+	char ip[15];
+	int port;
+	int pid;
+	int size;
+}
+*/
+
 typedef struct s_cpuUsage
 {
 	unsigned int usr;
