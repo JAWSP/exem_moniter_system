@@ -174,7 +174,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	if (flags == 123123)
 	{
 		ssize_t result = 0;
-		result = (*real_send)(socket, buffer, length, flags);
+		result = (*real_send)(socket, buffer, length, 0);
 		return (result);
 	}
 	//각각 udp 패킷을 할당
@@ -209,6 +209,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	//본체 보내기
 	ssize_t result = 0;
 	result = (*real_send)(socket, buffer, length, flags);
+	printf ("send size : %ld\n", length);
 
 	//after값 넣고 보내기
 	after *a;

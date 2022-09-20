@@ -59,6 +59,14 @@ typedef struct s_agentInfo
 	int indx;
 }agentInfo;
 
+typedef enum e_phase
+{
+	PHASE_BEFORE,
+	PHASE_MAIN,
+	PHASE_AFTER,
+	PHASE_RE
+}phase;
+
 
 //parse.c
 void parse_cpu(agentInfo *ag, int fd);
@@ -68,7 +76,7 @@ void parse_proc(agentInfo *ag, int fd);
 
 //recv_loop.c
 void *pth_server_loop(void *arg);
-int get_recv(char *buf, int size, agentInfo *ag, squeue *q);
+int get_recv(char *buf, int size, agentInfo *ag, squeue *q, phase *phase);
 
 //serv_utils.c
 char *get_curr_day(void);
