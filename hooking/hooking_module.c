@@ -158,7 +158,7 @@ void before_run()
 
 	s_serv_addr.sin_family = AF_INET;
 	s_serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	s_serv_addr.sin_port = htons(1234);
+	s_serv_addr.sin_port = htons(5678);
 
 	get_this_info();	
 

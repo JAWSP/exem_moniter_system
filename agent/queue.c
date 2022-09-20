@@ -72,11 +72,11 @@ void send_data(queue *q, int sock)
 	if (send(sock, pack->data, pack->len, 0) < 0)
 	{
 		printf("it's not access yet\n");
-		usleep(920);
+		usleep(1920);
 		pthread_mutex_unlock(&q->q_lock);
 		return ;
 	}
-	usleep(916);
+	usleep(10000);
 	free(pack->data);
 	pack->data = NULL;
 	free(pack);

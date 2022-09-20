@@ -16,6 +16,7 @@ typedef struct serv_queue squeue;
 typedef struct serv_global
 { 	
 	int sock;
+	int usock;
 	int flag;
 	int agent_fd;
 	char ids[9][9];
@@ -23,18 +24,6 @@ typedef struct serv_global
 	pthread_mutex_t g_lock;
 	pthread_mutex_t g_comu_lock;
 }g_serv;
-
-typedef struct s_agentInfo
-{
-	//이후에 길이를 받은 즉시 할당으로 바뀔 수 있음
-	char raw_data[1024 * 256];
-	char id[8];
-	char type;
-	char date[20];
-	char recv_date[20];
-	int count;
-	int indx;
-}agentInfo;
 
 typedef struct s_before
 {
@@ -55,6 +44,21 @@ typedef struct s_after
 	int size;
 	int time;
 } after;
+
+typedef struct s_agentInfo
+{
+	//이후에 길이를 받은 즉시 할당으로 바뀔 수 있음
+	char raw_data[1024 * 256];
+	char before_data[64];
+	char after_data[30];
+	char id[8];
+	char type;
+	char date[20];
+	char recv_date[20];
+	int count;
+	int indx;
+}agentInfo;
+
 
 //parse.c
 void parse_cpu(agentInfo *ag, int fd);

@@ -56,6 +56,7 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 void *pth_server_loop(void *arg)
 {
 	char buf[1024 * 256];
+	char ubuf[256];
 	int agent_fd = gs->agent_fd;
 	int size;
 	squeue *q = (squeue *)arg;
@@ -76,9 +77,17 @@ void *pth_server_loop(void *arg)
 
 	while (1)
 	{
+		struct sockaddr_in agt_adr;
+		socklen_t agt_adr_len;
 		agentInfo *ag;
+
 		if (!(ag = (agentInfo *)malloc(sizeof(agentInfo))))
 			err_by("agent info malloc error");
+		
+		agt_adr_len = sizeof(agt_adr);
+		if ((recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len)) < 0)
+			err_by("before packet recv error");
+		printf("before : %ld\n", sizeof(ubuf));
 		ag->indx = res;
 		if ((size = recv(agent_fd, buf, 1024 *256, 0)) > 0)
 		{
@@ -87,6 +96,9 @@ void *pth_server_loop(void *arg)
 		}
 		else
 			break ; //연결이 끊기면 루프끝->스레드끝
+		if ((recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len)) < 0)
+			err_by("before packet recv error");
+		printf("after : %ld\n", sizeof(ubuf));
 	}
 	return ((void*)0);
 }

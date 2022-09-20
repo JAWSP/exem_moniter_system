@@ -18,7 +18,7 @@ int accept_agent(int sock)
 	return (agent_fd);
 }
 
-void init_serv(squeue **q, struct sockaddr_in *server_addr)
+void init_serv(squeue **q, struct sockaddr_in *server_addr, struct sockaddr_in *udp_addr)
 {
 	//global init
 	if (!(gs = (g_serv *)malloc(sizeof(g_serv))))
@@ -67,21 +67,34 @@ void init_serv(squeue **q, struct sockaddr_in *server_addr)
 	server_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 	server_addr->sin_port = htons(1234);
 
+
 	int res = 0;
 	
 	res = bind(gs->sock, (struct sockaddr*)server_addr, sizeof(*server_addr));
 	if (res < 0)
 		err_by("server bind error");
 	listen(gs->sock, 13);
+
+	//udp소켓 초기 셋팅
+	int uoptval = 1;
+	gs->usock = socket(PF_INET, SOCK_DGRAM, 0);
+	if (gs->usock == -1)
+		err_by("udp server sock error");
+	if (setsockopt(gs->usock, SOL_SOCKET, SO_REUSEADDR, &uoptval, sizeof(uoptval)) == -1)
+		err_by("udp server socket set failed");
+	memset(udp_addr, 0, sizeof(*udp_addr));
+	udp_addr->sin_family = AF_INET;
+	udp_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+	udp_addr->sin_port = htons(5678);
 }
 
 int main(void)
 {
 	pthread_t pid, q_pid;
-	struct sockaddr_in server_addr;
+	struct sockaddr_in server_addr, udp_addr, agent_addr;
 	squeue *q;
 
-	init_serv(&q, &server_addr);
+	init_serv(&q, &server_addr, &udp_addr);
 	for (int i = 0; i < 9; i++)
 		printf("id %d : %s\n", i, gs->ids[i]);
 
