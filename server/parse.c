@@ -9,10 +9,15 @@ void write_header(agentInfo *ag, int fd, char *msg)
 {
 	char output[256];
 
-	sprintf(output, "------------------- id %s's %s, collect time : %s --------------------\n\n",
+	before *b = (before *)ag->before_data;
+	sprintf(output, "\n---------- id %s's %s, collect time : %s process name : %s(%d) by %d(%s) -----------\n",
 		ag->id,
 		msg,
-		ag->date
+		b->begin_time,
+		b->agent_name,
+		b->pid,
+		b->port,
+		b->ip
 	);
 	pthread_mutex_lock(&gs->g_lock);
 	write(fd, output, strlen(output));
@@ -23,11 +28,13 @@ void write_tail(agentInfo *ag, int fd, char *msg)
 {
 	char output[256];
 
-	sprintf(output, "\n---------------- id %s's %s, write time : %s | raw : %d ----------------\n\n\n",
+	after *a = (after *)ag->after_data;
+	sprintf(output, "\n---------------- id %s's %s, write time : %s | raw : %d size : %d ----------------\n\n\n",
 		ag->id,
 		msg,
 		get_curr_time(),
-		ag->count
+		ag->count,
+		a->size
 	);
 	write(fd, output, strlen(output));
 }

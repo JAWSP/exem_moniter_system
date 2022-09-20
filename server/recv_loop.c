@@ -64,6 +64,7 @@ void *pth_server_loop(void *arg)
 	phase phase;
 
 	int res = 0;
+	//루프 시작 전에 인증절차
 	pthread_mutex_lock(&gs->g_comu_lock);
 	if ((res = certification()) < 0)
 	{
@@ -96,7 +97,7 @@ void *pth_server_loop(void *arg)
 		{
 			if ((ress = (recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len))) < 0)
 				err_by("before packet recv error");
-			printf("before : %d\n", res);
+			printf("before : %d\n", ress);
 			memcpy(ag->before_data, ubuf, res);
 			phase = PHASE_MAIN;
 		}
@@ -106,7 +107,7 @@ void *pth_server_loop(void *arg)
 			if ((size = recv(agent_fd, buf, 1024 *256, 0)) > 0)
 			{
 				if (get_recv(buf, size, ag, q, &phase) == -1)
-					break ;
+					break ; //recv가 잘못되면 루프끝->스레드끝
 			}
 			else
 				break ; //연결이 끊기면 루프끝->스레드끝
