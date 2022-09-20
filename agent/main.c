@@ -54,7 +54,7 @@ int certification(char *arg)
 	return (1);
 }
 
-
+/*
 void get_this_info(void)
 {
 	struct dirent *buf = NULL;
@@ -92,6 +92,7 @@ void get_this_info(void)
 	}
 	err_by("not found process info");
 }
+*/
 
 int main(int argc, char **argv)
 {

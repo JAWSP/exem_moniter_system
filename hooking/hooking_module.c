@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
 #include <dirent.h>
@@ -32,52 +33,12 @@ typedef struct s_before //나중에 before가 된다?
 	int size;
 } before;
 
-//여기가 바디
-typedef struct s_cpuUsage
-{
-	unsigned int usr;
-	unsigned int sys;
-	unsigned int iowait;
-	unsigned int idle;
-} cpuUsage;
-
-typedef struct s_memUsage
-{
-	unsigned int free;
-	unsigned int total;
-	unsigned int used;
-	unsigned int swap_total;
-	unsigned int swap_used;
-} memUsage;
-
-typedef struct s_packUsage
-{
-	char inter[16];
-	unsigned int in_bytes;
-	unsigned int in_packets;
-	unsigned int out_bytes;
-	unsigned int out_packets;
-} packUsage;
-
-
-typedef struct s_process
-{
-	char name[16];
-	unsigned int pid;
-	unsigned int ppid;
-	unsigned int cpu_time;
-	char user_name[32];
-	char cmd_line[526];
-	struct s_process *next;
-} procInfo;
-
-
 ssize_t (*real_send)(int socket, const void *buffer, size_t length, int flags);
 
 static int sock;
 static struct sockaddr_in s_agent_addr;
 static int s_port;
-static int s_ip;
+static char s_ip[15];
 static int s_pid;
 static char s_name[9];
 
@@ -85,6 +46,24 @@ void err_by(char *reason)
 {
 	perror(reason);
 	exit(-1);
+}
+
+DIR *open_dir(DIR *dir, char *root)
+{
+	dir = opendir(root);
+	if (dir == NULL)
+		err_by("diropen failed");
+
+	return (dir);
+}
+
+FILE *open_fs(FILE *fs, char *root)
+{
+	fs = fopen(root, "r");
+	if (fs == NULL)
+		err_by("fopen failed");
+
+	return (fs);
 }
 
 void get_this_info(void)
@@ -128,9 +107,11 @@ void get_this_info(void)
 __attribute__((constructor))
 void before_run()
 {
-	sock = socket(PF_INET, SOCK_STREAM, 0);
+	printf("qwd\n");
+	sock = socket(PF_INET, SOCK_DGRAM, 0);
 	if (sock == -1)
 		err_by("socket error");
+	printf("qwd\n");
 
 	memset(&(s_agent_addr), 0, sizeof(struct sockaddr_in));
 
@@ -142,12 +123,10 @@ void before_run()
 
 	printf("YEAAAAAAHHHHHH\n");
 
-	real_send = (ssize_t (*)(int, const void *, size_t, int))dlysm(RTLD_NEXT, send);
+	real_send = (ssize_t (*)(int, const void *, size_t, int))dlsym(RTLD_NEXT, "send");
 }
 
 ssize_t send(int socket, const void *buffer, size_t length, int flags)
 {
-	if (socket == 0)
-		socket = sock;
 	return (*real_send)(socket, buffer, length, flags);
 }
