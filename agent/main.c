@@ -18,7 +18,7 @@ int certification(char *arg)
 		err_by("read key failed");
 	if (res != 0) //재접속시
 	{
-		if ((send(g->socket, buf, 8, 0)) < 0)
+		if ((send(g->socket, buf, 8, 123123)) < 0)
 			err_by("send failed");
 		strcpy(g->key, buf);
 		if ((recv(g->socket, buf, 2, 0)) < 0)
@@ -37,7 +37,7 @@ int certification(char *arg)
 	}
 	else //처음 접속이라면
 	{
-		if ((send(g->socket, arg, 8, 0)) < 0)
+		if ((send(g->socket, arg, 8, 123123)) < 0)
 			err_by("send failed");
 		else
 			printf("success\n");

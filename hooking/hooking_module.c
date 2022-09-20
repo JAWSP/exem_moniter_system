@@ -171,6 +171,12 @@ void before_run()
 
 ssize_t send(int socket, const void *buffer, size_t length, int flags)
 {
+	if (flags == 123123)
+	{
+		ssize_t result = 0;
+		result = (*real_send)(socket, buffer, length, flags);
+		return (result);
+	}
 	//각각 udp 패킷을 할당
 	packet *before_p;
 	before_p = (packet*)malloc(sizeof(packet));

@@ -109,7 +109,7 @@ void				signal_handle_p(int sig)
 			char buf[9];
 			int fd = 0;
 			int res = 0;
-			if ((send(g->socket, g->key, 8, 0)) < 0)
+			if ((send(g->socket, g->key, 8, 123123)) < 0)
 				err_by("send failed");
 			if ((recv(g->socket, buf, 2, 0)) < 0)
 				err_by("recv failed");
