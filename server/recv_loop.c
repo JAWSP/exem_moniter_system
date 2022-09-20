@@ -49,7 +49,7 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q, phase *phase)
 
 		curr_size = 0;
 		full_size = 0;
-		phase++;
+		*phase = PHASE_AFTER;
 	}
 	return (0);
 }
@@ -97,6 +97,7 @@ void *pth_server_loop(void *arg)
 			if ((ress = (recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len))) < 0)
 				err_by("before packet recv error");
 			printf("before : %d\n", res);
+			memcpy(ag->before_data, ubuf, res);
 			phase = PHASE_MAIN;
 		}
 		ag->indx = res;
@@ -115,7 +116,8 @@ void *pth_server_loop(void *arg)
 			if ((ress = (recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len))) < 0)
 				err_by("before packet recv error");
 			printf("after : %d\n", ress);
-			phase = PHASE_BEFORE;
+			memcpy(ag->after_data, ubuf, res);
+			phase = PHASE_READY;
 		}
 	}
 	return ((void*)0);

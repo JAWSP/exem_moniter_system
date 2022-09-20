@@ -61,10 +61,10 @@ typedef struct s_agentInfo
 
 typedef enum e_phase
 {
+	PHASE_READY,
 	PHASE_BEFORE,
 	PHASE_MAIN,
 	PHASE_AFTER,
-	PHASE_RE
 }phase;
 
 

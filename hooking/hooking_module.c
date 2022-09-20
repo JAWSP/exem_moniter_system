@@ -50,6 +50,10 @@ static char s_ip[15];
 static int s_pid;
 static char s_name[9];
 
+/*
+여기서부터 함수들
+*/
+
 void err_by(char *reason)
 {
 	perror(reason);
