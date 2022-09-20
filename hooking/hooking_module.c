@@ -197,8 +197,8 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	b->port = 1234;
 	b->pid = s_pid;
 
-	//sendto(sock, before_p->data, before_p->len, 0,
-	//	(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
+	sendto(sock, before_p->data, before_p->len, 0,
+		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
 
 	//본체 보내기
 	ssize_t result = 0;
@@ -212,8 +212,8 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	a->pid = s_pid;
 	a->size = length;
 
-	//sendto(sock, after_p->data, after_p->len, 0,
-	//	(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
+	sendto(sock, after_p->data, after_p->len, 0,
+		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
 
 	//NULL TIME
 	free(before_p->data);

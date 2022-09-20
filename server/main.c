@@ -86,6 +86,9 @@ void init_serv(squeue **q, struct sockaddr_in *server_addr, struct sockaddr_in *
 	udp_addr->sin_family = AF_INET;
 	udp_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 	udp_addr->sin_port = htons(5678);
+	res = bind(gs->usock, (struct sockaddr*)udp_addr, sizeof(*udp_addr));
+	if (res < 0)
+		err_by("udp server bind error");
 }
 
 int main(void)
