@@ -4,6 +4,7 @@
 
 extern g_serv *gs;
 
+//TODO 나중에 중복확인도 넣으세요
 int certification(void)
 {
 	int res = 0;

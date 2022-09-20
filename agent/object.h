@@ -27,6 +27,10 @@ typedef struct s_lobal
 	char id[8];
 	char key[8];
 	struct sockaddr_in agent_addr;
+	char name[8];
+	char ip[15];
+	int port;
+	int pid;
 	int socket;
 } g_lobal;
 

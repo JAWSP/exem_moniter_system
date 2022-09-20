@@ -22,10 +22,11 @@ int get_recv(char *buf, int size, agentInfo *ag, squeue *q)
 		}
 		ag->type = ttt->type_n_date[0];
 		ag->count = ttt->count;
+		//TODO ag->id의 값이 갑자기 변한 이유 찾기
 		strcpy(ag->date, &(ttt->type_n_date[2]));
 		strcpy(ag->recv_date, get_curr_day());
 		printf("test : %s, %s, %d, recv size : %d, full size : %d\n",
-				ttt->id, ttt->type_n_date, ttt->count, size, ttt->size);
+				gs->ids[ag->indx], ttt->type_n_date, ttt->count, size, ttt->size);
 		
 		if (ag->type != 'c' && ag->type != 'm' && ag->type != 'n' && ag->type != 'p')
 		{

@@ -54,6 +54,44 @@ int certification(char *arg)
 	return (1);
 }
 
+void get_this_info(void)
+{
+	struct dirent *buf = NULL;
+	DIR *dir = NULL;
+	FILE *fs = NULL;
+	int pid = 0;
+	char cmd[40], tmp[1024], name[512];
+
+	//net info
+	g->port = ntohs(g->agent_addr.sin_port);
+	inet_ntop(AF_INET, &g->agent_addr.sin_addr, g->ip, INET_ADDRSTRLEN);
+	printf("port : %d, ip : %s\n", g->port, g->ip);
+	//process info
+	dir = open_dir(dir, "/proc");
+	while ((buf = readdir(dir)) != NULL)
+	{
+		if ((pid = atoi(buf->d_name)) > 0)
+		{
+			sprintf(cmd, "/proc/%d/status", pid);
+			fs = open_fs(fs, cmd);	
+			fgets(tmp, BUFF_SIZE, fs);
+			if (!sscanf(tmp, "%*s %s", name))
+				err_by("process name sscanf error");
+			name[strlen(name)] = '\0';
+			if (strcmp("monitor", name) == 0)
+			{
+					strcpy(g->name ,name);
+					g->pid = pid;
+					fclose(fs);
+					closedir(dir);
+					return ;
+			}
+			fclose(fs);
+		}
+	}
+	err_by("not found process info");
+}
+
 int main(int argc, char **argv)
 {
 	//struct sockaddr_in agent_addr;
@@ -71,10 +109,6 @@ int main(int argc, char **argv)
 	if (g->socket == -1)
 		err_by("socket error");
 
-	//id설정
-//	srand(time(NULL));
-//	g->agent_id = (rand() % 99999999);	
-
 	memset(&(g->agent_addr), 0, sizeof(struct sockaddr_in));
 
 	g->agent_addr.sin_family = AF_INET;
@@ -87,15 +121,14 @@ int main(int argc, char **argv)
 	if (!certification((argc == 2) ? argv[1] : "testtest"))
 		err_by("certification failed!");
 
+	get_this_info();
+
 	pthread_create(&pid_c, NULL, pth_parse_cpu, (void *)q);
 	pthread_create(&pid_m, NULL, pth_parse_mem, (void *)q);
 	pthread_create(&pid_n, NULL, pth_parse_packet, (void *)q);
 	pthread_create(&pid_p, NULL, pth_parse_process, (void *)q);
 	pthread_create(&pid_q, NULL, pth_queue_process, (void *)q);
 
-	//join을 살린 이유
-	//이걸 안쓰면 main에서 먼저 끝내게 됨
-	//그리고 스레드는 무한으로 돌아서 메인-서브 스레드간의 동기화문제는 상솬없다고 생각
 	pthread_join(pid_c, NULL);
 	pthread_join(pid_m, NULL);
 	pthread_join(pid_n, NULL);
