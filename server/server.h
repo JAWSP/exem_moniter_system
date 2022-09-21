@@ -27,7 +27,6 @@ typedef struct serv_global
 
 typedef struct s_before
 {
-	char id[8];
 	char agent_name[8];
 	char ip[15];
 	char begin_time[20];
@@ -37,20 +36,18 @@ typedef struct s_before
 
 typedef struct s_after
 {
-	char id[8];
 	char agent_name[8];
-	char elapse_time[20];
+	double elapse_time;
 	int pid;
 	int size;
-	int time;
 } after;
 
 typedef struct s_agentInfo
 {
 	//이후에 길이를 받은 즉시 할당으로 바뀔 수 있음
 	char raw_data[1024 * 256];
-	char before_data[64];
-	char after_data[30];
+	char before_data[68];
+	char after_data[38];
 	char id[8];
 	char type;
 	char date[20];

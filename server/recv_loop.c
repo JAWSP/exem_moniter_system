@@ -98,7 +98,7 @@ void *pth_server_loop(void *arg)
 			if ((ress = (recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len))) < 0)
 				err_by("before packet recv error");
 			printf("before : %d\n", ress);
-			memcpy(ag->before_data, ubuf, res);
+			memcpy(ag->before_data, ubuf, ress);
 			phase = PHASE_MAIN;
 		}
 		ag->indx = res;
@@ -117,7 +117,7 @@ void *pth_server_loop(void *arg)
 			if ((ress = (recvfrom(gs->usock, ubuf, 256, 0, (struct sockaddr *)&agt_adr, &agt_adr_len))) < 0)
 				err_by("before packet recv error");
 			printf("after : %d\n", ress);
-			memcpy(ag->after_data, ubuf, res);
+			memcpy(ag->after_data, ubuf, ress);
 			phase = PHASE_READY;
 		}
 	}

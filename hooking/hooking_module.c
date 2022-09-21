@@ -24,7 +24,6 @@ typedef struct s_packet
 //시간상 id는 못넣었으나, 이부분은 메인 패킷의 헤더에 있음
 typedef struct s_before
 {
-	char id[8];
 	char agent_name[8];
 	char ip[15];
 	char begin_time[20];
@@ -34,9 +33,8 @@ typedef struct s_before
 
 typedef struct s_after
 {
-	char id[8];
 	char agent_name[8];
-	int elapse_time;
+	double elapse_time;
 	int pid;
 	int size;
 } after;
@@ -198,8 +196,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	after_p->len  = sizeof(after) + 1;
 	after_p->data = (unsigned char *)malloc(after_p->len);
 	//시간설정
-	struct timeval start, end;
-	double diff_usec = 0;
+	double start, end;
 
 	//before값 넣고 보내기
 	before *b;
@@ -210,7 +207,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	b->port = 1234;
 	b->pid = s_pid;
 
-	gettimeofday(&start, NULL);//전송시작
+	start = (double)clock() / CLOCKS_PER_SEC;
 	sendto(sock, before_p->data, before_p->len, 0,
 		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
 
@@ -227,9 +224,8 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	a->pid = s_pid;
 	a->size = length;
 
-	gettimeofday(&end, NULL);//전송끝
-	diff_usec = (end.tv_usec - start.tv_usec) / (double)1000000;
-	a->elapse_time = (int)diff_usec / 1000;
+	end = (double)clock() / CLOCKS_PER_SEC;
+	a->elapse_time = end - start;
 
 	sendto(sock, after_p->data, after_p->len, 0,
 		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
