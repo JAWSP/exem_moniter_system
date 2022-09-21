@@ -181,6 +181,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 		result = (*real_send)(socket, buffer, length, 0);
 		return (result);
 	}
+
 	//각각 udp 패킷을 할당
 	packet *before_p;
 	before_p = (packet*)malloc(sizeof(packet));
@@ -196,7 +197,9 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 
 	after_p->len  = sizeof(after) + 1;
 	after_p->data = (unsigned char *)malloc(after_p->len);
-
+	//시간설정
+	struct timeval start, end;
+	double diff_usec = 0;
 
 	//before값 넣고 보내기
 	before *b;
@@ -207,6 +210,7 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	b->port = 1234;
 	b->pid = s_pid;
 
+	gettimeofday(&start, NULL);//전송시작
 	sendto(sock, before_p->data, before_p->len, 0,
 		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));
 
@@ -222,6 +226,10 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 	//a->elapse_time =
 	a->pid = s_pid;
 	a->size = length;
+
+	gettimeofday(&end, NULL);//전송끝
+	diff_usec = (end.tv_usec - start.tv_usec) / (double)1000000;
+	a->elapse_time = (int)diff_usec / 1000;
 
 	sendto(sock, after_p->data, after_p->len, 0,
 		(struct sockaddr*)&s_serv_addr, sizeof(s_serv_addr));

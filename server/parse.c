@@ -11,7 +11,7 @@ void write_header(agentInfo *ag, int fd, char *msg)
 
 	before *b = (before *)ag->before_data;
 	sprintf(output, "\n---------- id %s's %s, collect time : %s process name : %s(%d) by %d(%s) -----------\n",
-		ag->id,
+		gs->ids[ag->indx],
 		msg,
 		b->begin_time,
 		b->agent_name,
@@ -29,10 +29,10 @@ void write_tail(agentInfo *ag, int fd, char *msg)
 	char output[256];
 
 	after *a = (after *)ag->after_data;
-	sprintf(output, "\n---------------- id %s's %s, write time : %s | raw : %d size : %d ----------------\n\n\n",
-		ag->id,
+	sprintf(output, "\n---------------- id %s's %s, elapse time : %dms | raw : %d size : %d ----------------\n\n\n",
+		gs->ids[ag->indx],
 		msg,
-		get_curr_time(),
+		a->elapse_time,
 		ag->count,
 		a->size
 	);
